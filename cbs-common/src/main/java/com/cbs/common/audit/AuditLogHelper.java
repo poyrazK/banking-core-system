@@ -5,29 +5,43 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
 
+/**
+ * Utility class for audit logging operations.
+ */
 public final class AuditLogHelper {
 
     private AuditLogHelper() {
     }
 
+    /**
+     * Creates a success audit event.
+     */
     public static AuditEvent success(String action,
-                                     String resourceType,
-                                     String resourceId,
-                                     String actorType,
-                                     String actorId,
-                                     Map<String, Object> details) {
-        return AuditEvent.of(action, resourceType, resourceId, actorType, actorId, AuditOutcome.SUCCESS, details);
+            String resourceType,
+            String resourceId,
+            String actorType,
+            String actorId,
+            Map<String, Object> details) {
+        return AuditEvent.of(action, resourceType, resourceId, actorType, actorId,
+                AuditOutcome.SUCCESS, details);
     }
 
+    /**
+     * Creates a failure audit event.
+     */
     public static AuditEvent failure(String action,
-                                     String resourceType,
-                                     String resourceId,
-                                     String actorType,
-                                     String actorId,
-                                     Map<String, Object> details) {
-        return AuditEvent.of(action, resourceType, resourceId, actorType, actorId, AuditOutcome.FAILURE, details);
+            String resourceType,
+            String resourceId,
+            String actorType,
+            String actorId,
+            Map<String, Object> details) {
+        return AuditEvent.of(action, resourceType, resourceId, actorType, actorId,
+                AuditOutcome.FAILURE, details);
     }
 
+    /**
+     * Converts an AuditEvent to a structured map of fields for logging.
+     */
     public static Map<String, Object> toStructuredFields(AuditEvent event) {
         Objects.requireNonNull(event, "event must not be null");
 
