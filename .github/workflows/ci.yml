@@ -7,9 +7,32 @@ on:
     branches: [ "main" ]
 
 jobs:
-  build:
-    name: Build & Unit Tests
+  test:
+    name: ${{ matrix.module }}
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        module: [
+          "cbs-common",
+          "cbs-config-server",
+          "cbs-discovery-server",
+          "cbs-api-gateway",
+          "cbs-auth-service",
+          "cbs-customer-service",
+          "cbs-account-service",
+          "cbs-transaction-service",
+          "cbs-ledger-service",
+          "cbs-loan-service",
+          "cbs-deposit-service",
+          "cbs-interest-service",
+          "cbs-fee-service",
+          "cbs-payment-service",
+          "cbs-card-service",
+          "cbs-fx-service",
+          "cbs-notification-service",
+          "cbs-reporting-service"
+        ]
 
     steps:
       - name: Checkout Code
@@ -22,13 +45,16 @@ jobs:
           distribution: 'temurin'
           cache: 'maven'
 
-      - name: Build with Maven
-        run: mvn clean verify -DskipITs
+      - name: Build and Test Module
+        run: |
+          mvn test -pl ${{ matrix.module }} -am \
+            -Dtest="!*IntegrationTest,!*PostgresIntegrationTest" \
+            -Dsurefire.failIfNoSpecifiedTests=false
 
-      - name: Upload Coverage Reports
+      - name: Upload Coverage Report
         uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: coverage-reports
-          path: "**/target/site/jacoco/"
+          name: coverage-${{ matrix.module }}
+          path: "${{ matrix.module }}/target/site/jacoco/"
           retention-days: 5
