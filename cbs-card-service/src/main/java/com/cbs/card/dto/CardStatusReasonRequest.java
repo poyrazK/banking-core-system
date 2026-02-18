@@ -1,0 +1,9 @@
+package com.cbs.card.dto;
+
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
+
+public record CardStatusReasonRequest(
+        @NotBlank @Size(max = 255) String reason
+) {
+}
