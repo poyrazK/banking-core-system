@@ -1,0 +1,89 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: cbs-api-gateway
+  cloud:
+    gateway:
+      routes:
+        - id: auth-service
+          uri: lb://cbs-auth-service
+          predicates:
+            - Path=/api/v1/auth/**
+        - id: customer-service
+          uri: lb://cbs-customer-service
+          predicates:
+            - Path=/api/v1/customers/**
+        - id: account-service
+          uri: lb://cbs-account-service
+          predicates:
+            - Path=/api/v1/accounts/**
+        - id: ledger-service
+          uri: lb://cbs-ledger-service
+          predicates:
+            - Path=/api/v1/ledger/**
+        - id: transaction-service
+          uri: lb://cbs-transaction-service
+          predicates:
+            - Path=/api/v1/transactions/**
+        - id: payment-service
+          uri: lb://cbs-payment-service
+          predicates:
+            - Path=/api/v1/payments/**
+        - id: loan-service
+          uri: lb://cbs-loan-service
+          predicates:
+            - Path=/api/v1/loans/**
+        - id: deposit-service
+          uri: lb://cbs-deposit-service
+          predicates:
+            - Path=/api/v1/deposits/**
+        - id: card-service
+          uri: lb://cbs-card-service
+          predicates:
+            - Path=/api/v1/cards/**
+        - id: notification-service
+          uri: lb://cbs-notification-service
+          predicates:
+            - Path=/api/v1/notifications/**
+        - id: interest-service
+          uri: lb://cbs-interest-service
+          predicates:
+            - Path=/api/v1/interests/**
+        - id: fee-service
+          uri: lb://cbs-fee-service
+          predicates:
+            - Path=/api/v1/fees/**
+        - id: fx-service
+          uri: lb://cbs-fx-service
+          predicates:
+            - Path=/api/v1/fx/**
+        - id: reporting-service
+          uri: lb://cbs-reporting-service
+          predicates:
+            - Path=/api/v1/reports/**
+      discovery:
+        locator:
+          enabled: true
+          lower-case-service-id: true
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      probes:
+        enabled: true
+  health:
+    livenessstate:
+      enabled: true
+    readinessstate:
+      enabled: true
