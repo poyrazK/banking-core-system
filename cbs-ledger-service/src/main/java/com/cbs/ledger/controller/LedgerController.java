@@ -6,6 +6,7 @@ import com.cbs.ledger.dto.BalanceResponse;
 import com.cbs.ledger.dto.CreateAccountRequest;
 import com.cbs.ledger.dto.PostJournalEntryRequest;
 import com.cbs.ledger.dto.PostJournalEntryResponse;
+import com.cbs.ledger.dto.PostPolicyEntryRequest;
 import com.cbs.ledger.dto.ReconciliationResponse;
 import com.cbs.ledger.service.LedgerAccountService;
 import com.cbs.ledger.service.LedgerPostingService;
@@ -61,6 +62,14 @@ public class LedgerController {
     ) {
         PostJournalEntryResponse response = ledgerPostingService.postEntry(request);
         return ResponseEntity.ok(ApiResponse.success("Journal entry posted", response));
+    }
+
+    @PostMapping("/entries/policy")
+    public ResponseEntity<ApiResponse<PostJournalEntryResponse>> postPolicyEntry(
+            @Valid @RequestBody PostPolicyEntryRequest request
+    ) {
+        PostJournalEntryResponse response = ledgerPostingService.postPolicyEntry(request);
+        return ResponseEntity.ok(ApiResponse.success("Policy journal entry posted", response));
     }
 
     @GetMapping("/balances/{accountCode}")

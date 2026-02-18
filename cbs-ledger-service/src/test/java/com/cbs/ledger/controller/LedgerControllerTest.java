@@ -1,6 +1,7 @@
 package com.cbs.ledger.controller;
 
 import com.cbs.ledger.dto.AccountResponse;
+import com.cbs.ledger.dto.PostJournalEntryResponse;
 import com.cbs.ledger.dto.ReconciliationResponse;
 import com.cbs.ledger.exception.LedgerExceptionHandler;
 import com.cbs.ledger.model.AccountType;
@@ -82,7 +83,37 @@ class LedgerControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(body))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.success").value(false));
+                .andExpect(jsonPath("$.success").value(false))
+                .andExpect(jsonPath("$.errorCode").value("VALIDATION_ERROR"));
+    }
+
+    @Test
+    void postPolicyEntry_returnsSuccessResponse() throws Exception {
+        when(ledgerPostingService.postPolicyEntry(any())).thenReturn(new PostJournalEntryResponse(
+                1L,
+                "PAY-100",
+                new BigDecimal("200.0000"),
+                new BigDecimal("200.0000")
+        ));
+
+        String body = """
+                {
+                  "reference": "PAY-100",
+                  "description": "Bill payment",
+                  "valueDate": "2026-02-18",
+                  "operationType": "PAYMENT",
+                  "amount": 200.00,
+                  "accountCode": "1000"
+                }
+                """;
+
+        mockMvc.perform(post("/api/v1/ledger/entries/policy")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.message").value("Policy journal entry posted"))
+                .andExpect(jsonPath("$.data.reference").value("PAY-100"));
     }
 
     @Test

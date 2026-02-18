@@ -4,9 +4,11 @@ import com.cbs.common.exception.ApiException;
 import com.cbs.ledger.dto.JournalLineRequest;
 import com.cbs.ledger.dto.PostJournalEntryRequest;
 import com.cbs.ledger.dto.PostJournalEntryResponse;
+import com.cbs.ledger.dto.PostPolicyEntryRequest;
 import com.cbs.ledger.model.AccountType;
 import com.cbs.ledger.model.EntryType;
 import com.cbs.ledger.model.JournalEntry;
+import com.cbs.ledger.model.LedgerOperationType;
 import com.cbs.ledger.model.LedgerAccount;
 import com.cbs.ledger.repository.JournalEntryRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -81,5 +83,48 @@ class LedgerPostingServiceTest {
         ApiException exception = assertThrows(ApiException.class, () -> ledgerPostingService.postEntry(request));
 
         assertEquals("LEDGER_UNBALANCED_ENTRY", exception.getErrorCode());
+    }
+
+    @Test
+    void postPolicyEntry_usesPaymentClearingWhenCounterpartyMissing() {
+        PostPolicyEntryRequest request = new PostPolicyEntryRequest(
+                "REF-3",
+                "payment",
+                LocalDate.of(2026, 2, 18),
+                LedgerOperationType.PAYMENT,
+                new BigDecimal("50.00"),
+                "1000",
+                null
+        );
+
+        when(journalEntryRepository.existsByReference("REF-3")).thenReturn(false);
+        when(ledgerAccountService.getActiveAccountByCode("1000"))
+                .thenReturn(new LedgerAccount("1000", "Cash", AccountType.ASSET));
+        when(ledgerAccountService.getActiveAccountByCode("PAYMENT-CLEARING"))
+                .thenReturn(new LedgerAccount("PAYMENT-CLEARING", "Clearing", AccountType.LIABILITY));
+        when(journalEntryRepository.save(any(JournalEntry.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        PostJournalEntryResponse response = ledgerPostingService.postPolicyEntry(request);
+
+        assertEquals("REF-3", response.reference());
+        assertEquals(new BigDecimal("50.0000"), response.totalDebit());
+        assertEquals(new BigDecimal("50.0000"), response.totalCredit());
+    }
+
+    @Test
+    void postPolicyEntry_throwsWhenTransferCounterpartyMissing() {
+        PostPolicyEntryRequest request = new PostPolicyEntryRequest(
+                "REF-4",
+                "transfer",
+                LocalDate.of(2026, 2, 18),
+                LedgerOperationType.TRANSFER,
+                new BigDecimal("25.00"),
+                "1000",
+                null
+        );
+
+        ApiException exception = assertThrows(ApiException.class, () -> ledgerPostingService.postPolicyEntry(request));
+
+        assertEquals("LEDGER_POLICY_COUNTERPARTY_REQUIRED", exception.getErrorCode());
     }
 }
