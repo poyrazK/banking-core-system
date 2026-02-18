@@ -22,8 +22,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest(properties = {
         "eureka.client.enabled=false",
-    "spring.jpa.hibernate.ddl-auto=create-drop",
-    "ledger.posting.enabled=false"
+        "spring.jpa.hibernate.ddl-auto=create-drop",
+        "ledger.posting.enabled=false"
 })
 class PaymentServicePostgresIntegrationTest {
 
@@ -31,8 +31,7 @@ class PaymentServicePostgresIntegrationTest {
     static void registerDataSource(DynamicPropertyRegistry registry) {
         registry.add("spring.datasource.url", () -> System.getProperty(
                 "it.db.url",
-                "jdbc:postgresql://localhost:55435/cbs_payment_it"
-        ));
+                "jdbc:postgresql://localhost:55435/cbs_payment_it"));
         registry.add("spring.datasource.username", () -> System.getProperty("it.db.username", "test"));
         registry.add("spring.datasource.password", () -> System.getProperty("it.db.password", "test"));
     }
@@ -59,8 +58,7 @@ class PaymentServicePostgresIntegrationTest {
                 PaymentMethod.BANK_TRANSFER,
                 " pay-001 ",
                 "Invoice payment",
-                LocalDate.of(2026, 2, 18)
-        );
+                LocalDate.of(2026, 2, 18));
 
         PaymentResponse response = paymentService.createPayment(request);
 
@@ -79,13 +77,15 @@ class PaymentServicePostgresIntegrationTest {
                 PaymentMethod.SWIFT,
                 "PAY-002",
                 "International transfer",
-                LocalDate.of(2026, 2, 18)
-        ));
+                LocalDate.of(2026, 2, 18)));
+
+        Payment persistedForUpdate = paymentRepository.findById(created.id()).orElseThrow();
+        persistedForUpdate.setStatus(PaymentStatus.PROCESSING);
+        paymentRepository.save(persistedForUpdate);
 
         PaymentResponse failed = paymentService.failPayment(
                 created.id(),
-                new PaymentStatusUpdateRequest(" network timeout ")
-        );
+                new PaymentStatusUpdateRequest(" network timeout "));
 
         assertEquals(PaymentStatus.FAILED, failed.status());
         assertEquals("network timeout", failed.failureReason());
