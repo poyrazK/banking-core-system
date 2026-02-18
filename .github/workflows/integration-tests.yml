@@ -6,8 +6,47 @@ on:
 
 jobs:
   integration-tests:
-    name: PostgreSQL Integration Tests
+    name: ${{ matrix.module }} (IT)
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - module: "cbs-auth-service"
+            db: "cbs_auth_it"
+          - module: "cbs-customer-service"
+            db: "cbs_customer_it"
+          - module: "cbs-account-service"
+            db: "cbs_account_it"
+          - module: "cbs-transaction-service"
+            db: "cbs_transaction_it"
+          - module: "cbs-ledger-service"
+            db: "cbs_ledger_it"
+          - module: "cbs-loan-service"
+            db: "cbs_loan_it"
+          - module: "cbs-deposit-service"
+            db: "cbs_deposit_it"
+          - module: "cbs-interest-service"
+            db: "cbs_interest_it"
+          - module: "cbs-fee-service"
+            db: "cbs_fee_it"
+          - module: "cbs-payment-service"
+            db: "cbs_payment_it"
+          - module: "cbs-card-service"
+            db: "cbs_card_it"
+          - module: "cbs-fx-service"
+            db: "cbs_fx_it"
+          - module: "cbs-notification-service"
+            db: "cbs_notification_it"
+          - module: "cbs-reporting-service"
+            db: "cbs_reporting_it"
+          # These don't need a custom DB but have integration tests
+          - module: "cbs-config-server"
+            db: "postgres"
+          - module: "cbs-discovery-server"
+            db: "postgres"
+          - module: "cbs-api-gateway"
+            db: "postgres"
 
     services:
       postgres:
@@ -35,52 +74,21 @@ jobs:
           distribution: 'temurin'
           cache: 'maven'
 
-      - name: Create Databases
+      - name: Create Module Database
+        if: matrix.db != 'postgres'
         run: |
-          DATABASES=(
-            "cbs_account_it" "cbs_ledger_it" "cbs_transaction_it" "cbs_payment_it"
-            "cbs_loan_it" "cbs_deposit_it" "cbs_interest_it" "cbs_fee_it"
-            "cbs_card_it" "cbs_fx_it" "cbs_notification_it" "cbs_reporting_it"
-            "cbs_auth_it" "cbs_customer_it"
-          )
-          for db in "${DATABASES[@]}"; do
-            echo "Creating database: $db"
-            PGPASSWORD=test psql -h localhost -U test -d postgres -c "CREATE DATABASE $db;"
-          done
+          PGPASSWORD=test psql -h localhost -U test -d postgres -c "CREATE DATABASE ${{ matrix.db }};"
 
       - name: Run Integration Tests
         run: |
-          # Build all modules first (without tests) to ensure dependencies are available
-          mvn clean install -DskipTests -am
-
-          # Map of services to their database names
-          declare -A SERVICE_DB_MAP=(
-            ["cbs-auth-service"]="cbs_auth_it"
-            ["cbs-customer-service"]="cbs_customer_it"
-            ["cbs-account-service"]="cbs_account_it"
-            ["cbs-transaction-service"]="cbs_transaction_it"
-            ["cbs-ledger-service"]="cbs_ledger_it"
-            ["cbs-loan-service"]="cbs_loan_it"
-            ["cbs-deposit-service"]="cbs_deposit_it"
-            ["cbs-interest-service"]="cbs_interest_it"
-            ["cbs-fee-service"]="cbs_fee_it"
-            ["cbs-payment-service"]="cbs_payment_it"
-            ["cbs-card-service"]="cbs_card_it"
-            ["cbs-fx-service"]="cbs_fx_it"
-            ["cbs-notification-service"]="cbs_notification_it"
-            ["cbs-reporting-service"]="cbs_reporting_it"
-          )
-
-          for service in "${!SERVICE_DB_MAP[@]}"; do
-            db_name=${SERVICE_DB_MAP[$service]}
-            echo "--------------------------------------------------------"
-            echo "Running Integration Tests for $service ($db_name)"
-            echo "--------------------------------------------------------"
-            mvn test -pl "$service" \
-              -DskipTests=false \
-              -Dsurefire.failIfNoSpecifiedTests=false \
-              -Dit.db.url="jdbc:postgresql://localhost:5432/$db_name" \
-              -Dit.db.username="test" \
-              -Dit.db.password="test" \
-              -Dtest="*PostgresIntegrationTest"
-          done
+          # Build parent and common first as they are needed by all modules
+          mvn install -DskipTests -am -pl ${{ matrix.module }}
+          
+          # Run the specific integration tests for the module
+          mvn test -pl ${{ matrix.module }} \
+            -DskipTests=false \
+            -Dsurefire.failIfNoSpecifiedTests=false \
+            -Dit.db.url="jdbc:postgresql://localhost:5432/${{ matrix.db }}" \
+            -Dit.db.username="test" \
+            -Dit.db.password="test" \
+            -Dtest="*IntegrationTest"
