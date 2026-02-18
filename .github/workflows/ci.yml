@@ -47,7 +47,7 @@ jobs:
 
       - name: Build and Test Module
         run: |
-          mvn test -pl ${{ matrix.module }} -am \
+          mvn checkstyle:check test -pl ${{ matrix.module }} -am \
             -Dtest="!*IntegrationTest,!*PostgresIntegrationTest" \
             -Dsurefire.failIfNoSpecifiedTests=false
 
