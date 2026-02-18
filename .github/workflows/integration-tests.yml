@@ -1,0 +1,59 @@
+name: Integration Tests
+
+on:
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  integration-tests:
+    name: PostgreSQL Integration Tests
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: test
+          POSTGRES_PASSWORD: test
+          POSTGRES_DB: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: 'maven'
+
+      - name: Create Databases
+        run: |
+          DATABASES=(
+            "cbs_account_it" "cbs_ledger_it" "cbs_transaction_it" "cbs_payment_it"
+            "cbs_loan_it" "cbs_deposit_it" "cbs_interest_it" "cbs_fee_it"
+            "cbs_card_it" "cbs_fx_it" "cbs_notification_it" "cbs_reporting_it"
+            "cbs_auth_it" "cbs_customer_it"
+          )
+          for db in "${DATABASES[@]}"; do
+            echo "Creating database: $db"
+            PGPASSWORD=test psql -h localhost -U test -d postgres -c "CREATE DATABASE $db;"
+          done
+
+      - name: Run Integration Tests
+        run: |
+          mvn test \
+            -DskipTests=false \
+            -Dsurefire.failIfNoSpecifiedTests=false \
+            -Dit.db.url="jdbc:postgresql://localhost:5432" \
+            -Dit.db.username="test" \
+            -Dit.db.password="test" \
+            -Dtest="*PostgresIntegrationTest,ConfigServerIntegrationTest,DiscoveryServerIntegrationTest,ApiGatewayIntegrationTest"

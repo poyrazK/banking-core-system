@@ -1,22 +1,24 @@
 package com.cbs.common.security;
 
+/**
+ * Utility class for masking credit card numbers (PANs) to maintain PCI-DSS
+ * compliance.
+ */
 public final class CardNumberMasker {
+
     private CardNumberMasker() {
+        // Utility class
     }
 
     /**
-     * Returns masked PAN showing only the last 4 digits. e.g., "************1234"
+     * Masks a card number, revealing only the last 4 digits.
+     * Format: ************1234
      */
-    public static String mask(String pan) {
-        if (pan == null || pan.isBlank()) {
-            return "****";
+    public static String mask(String cardNumber) {
+        if (cardNumber == null || cardNumber.length() <= 4) {
+            return cardNumber;
         }
-
-        String cleanPan = pan.trim().replace(" ", "");
-        if (cleanPan.length() < 4) {
-            return "****";
-        }
-
-        return "*".repeat(cleanPan.length() - 4) + cleanPan.substring(cleanPan.length() - 4);
+        String lastFour = cardNumber.substring(cardNumber.length() - 4);
+        return "*".repeat(cardNumber.length() - 4) + lastFour;
     }
 }

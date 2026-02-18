@@ -7,5 +7,6 @@ import java.time.LocalDate;
 
 public interface JournalEntryRepository extends JpaRepository<JournalEntry, Long> {
     boolean existsByReference(String reference);
+
     long countByValueDateBetween(LocalDate fromDate, LocalDate toDate);
 }
