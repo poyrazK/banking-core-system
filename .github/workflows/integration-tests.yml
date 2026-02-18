@@ -50,10 +50,37 @@ jobs:
 
       - name: Run Integration Tests
         run: |
-          mvn test \
-            -DskipTests=false \
-            -Dsurefire.failIfNoSpecifiedTests=false \
-            -Dit.db.url="jdbc:postgresql://localhost:5432" \
-            -Dit.db.username="test" \
-            -Dit.db.password="test" \
-            -Dtest="*PostgresIntegrationTest,ConfigServerIntegrationTest,DiscoveryServerIntegrationTest,ApiGatewayIntegrationTest"
+          # Build all modules first (without tests) to ensure dependencies are available
+          mvn clean install -DskipTests -am
+
+          # Map of services to their database names
+          declare -A SERVICE_DB_MAP=(
+            ["cbs-auth-service"]="cbs_auth_it"
+            ["cbs-customer-service"]="cbs_customer_it"
+            ["cbs-account-service"]="cbs_account_it"
+            ["cbs-transaction-service"]="cbs_transaction_it"
+            ["cbs-ledger-service"]="cbs_ledger_it"
+            ["cbs-loan-service"]="cbs_loan_it"
+            ["cbs-deposit-service"]="cbs_deposit_it"
+            ["cbs-interest-service"]="cbs_interest_it"
+            ["cbs-fee-service"]="cbs_fee_it"
+            ["cbs-payment-service"]="cbs_payment_it"
+            ["cbs-card-service"]="cbs_card_it"
+            ["cbs-fx-service"]="cbs_fx_it"
+            ["cbs-notification-service"]="cbs_notification_it"
+            ["cbs-reporting-service"]="cbs_reporting_it"
+          )
+
+          for service in "${!SERVICE_DB_MAP[@]}"; do
+            db_name=${SERVICE_DB_MAP[$service]}
+            echo "--------------------------------------------------------"
+            echo "Running Integration Tests for $service ($db_name)"
+            echo "--------------------------------------------------------"
+            mvn test -pl "$service" \
+              -DskipTests=false \
+              -Dsurefire.failIfNoSpecifiedTests=false \
+              -Dit.db.url="jdbc:postgresql://localhost:5432/$db_name" \
+              -Dit.db.username="test" \
+              -Dit.db.password="test" \
+              -Dtest="*PostgresIntegrationTest"
+          done
