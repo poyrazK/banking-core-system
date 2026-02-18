@@ -14,7 +14,7 @@ public class AuthExceptionHandler {
     @ExceptionHandler(ApiException.class)
     public ResponseEntity<ApiResponse<Void>> handleApiException(ApiException exception) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body(ApiResponse.failure(exception.getMessage()));
+                .body(ApiResponse.failure(exception.getErrorCode(), exception.getMessage()));
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
@@ -23,6 +23,6 @@ public class AuthExceptionHandler {
                 .findFirst()
                 .map(error -> error.getField() + " " + error.getDefaultMessage())
                 .orElse("Invalid request body");
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ApiResponse.failure(message));
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ApiResponse.failure("VALIDATION_ERROR", message));
     }
 }
