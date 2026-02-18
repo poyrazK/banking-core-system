@@ -4,6 +4,7 @@ import com.cbs.common.exception.ApiException;
 import com.cbs.transaction.dto.CreateTransactionRequest;
 import com.cbs.transaction.dto.ReverseTransactionRequest;
 import com.cbs.transaction.dto.TransactionResponse;
+import com.cbs.transaction.integration.LedgerPostingClient;
 import com.cbs.transaction.model.Transaction;
 import com.cbs.transaction.model.TransactionStatus;
 import com.cbs.transaction.repository.TransactionRepository;
@@ -16,9 +17,12 @@ import java.util.List;
 public class TransactionService {
 
     private final TransactionRepository transactionRepository;
+    private final LedgerPostingClient ledgerPostingClient;
 
-    public TransactionService(TransactionRepository transactionRepository) {
+    public TransactionService(TransactionRepository transactionRepository,
+                              LedgerPostingClient ledgerPostingClient) {
         this.transactionRepository = transactionRepository;
+        this.ledgerPostingClient = ledgerPostingClient;
     }
 
     @Transactional
@@ -40,7 +44,20 @@ public class TransactionService {
                 request.valueDate()
         );
 
-        return TransactionResponse.from(transactionRepository.save(transaction));
+        Transaction createdTransaction = transactionRepository.save(transaction);
+        createdTransaction.setStatus(TransactionStatus.PROCESSING);
+        Transaction processingTransaction = transactionRepository.save(createdTransaction);
+
+        try {
+            ledgerPostingClient.postTransaction(processingTransaction);
+            processingTransaction.setStatus(TransactionStatus.POSTED);
+            processingTransaction.setFailureReason(null);
+        } catch (ApiException exception) {
+            processingTransaction.setStatus(TransactionStatus.FAILED);
+            processingTransaction.setFailureReason(truncateReason(exception.getMessage()));
+        }
+
+        return TransactionResponse.from(transactionRepository.save(processingTransaction));
     }
 
     @Transactional(readOnly = true)
@@ -71,6 +88,10 @@ public class TransactionService {
     public TransactionResponse reverseTransaction(Long transactionId, ReverseTransactionRequest request) {
         Transaction transaction = findTransaction(transactionId);
 
+        if (transaction.getStatus() == TransactionStatus.INITIATED || transaction.getStatus() == TransactionStatus.PROCESSING) {
+            throw new ApiException("TRANSACTION_NOT_POSTED", "Only posted transaction can be reversed");
+        }
+
         if (transaction.getStatus() == TransactionStatus.REVERSED) {
             throw new ApiException("TRANSACTION_ALREADY_REVERSED", "Transaction is already reversed");
         }
@@ -81,8 +102,33 @@ public class TransactionService {
 
         transaction.setStatus(TransactionStatus.REVERSED);
         transaction.setReversalReason(request.reason().trim());
+        transaction.setFailureReason(null);
 
         return TransactionResponse.from(transactionRepository.save(transaction));
+    }
+
+    @Transactional
+    public TransactionResponse retryPosting(Long transactionId) {
+        Transaction transaction = findTransaction(transactionId);
+
+        if (transaction.getStatus() != TransactionStatus.FAILED) {
+            throw new ApiException("TRANSACTION_NOT_FAILED", "Only failed transaction can be retried");
+        }
+
+        transaction.setStatus(TransactionStatus.PROCESSING);
+        transaction.setFailureReason(null);
+        Transaction processingTransaction = transactionRepository.save(transaction);
+
+        try {
+            ledgerPostingClient.postTransaction(processingTransaction);
+            processingTransaction.setStatus(TransactionStatus.POSTED);
+            processingTransaction.setFailureReason(null);
+        } catch (ApiException exception) {
+            processingTransaction.setStatus(TransactionStatus.FAILED);
+            processingTransaction.setFailureReason(truncateReason(exception.getMessage()));
+        }
+
+        return TransactionResponse.from(transactionRepository.save(processingTransaction));
     }
 
     private Transaction findTransaction(Long transactionId) {
@@ -92,5 +138,12 @@ public class TransactionService {
 
     private String normalizeReference(String reference) {
         return reference.trim().toUpperCase();
+    }
+
+    private String truncateReason(String reason) {
+        if (reason == null) {
+            return null;
+        }
+        return reason.length() <= 255 ? reason : reason.substring(0, 255);
     }
 }

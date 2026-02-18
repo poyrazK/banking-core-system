@@ -19,7 +19,8 @@ public record TransactionResponse(
         String description,
         String reference,
         LocalDate valueDate,
-        String reversalReason
+        String reversalReason,
+        String failureReason
 ) {
     public static TransactionResponse from(Transaction transaction) {
         return new TransactionResponse(
@@ -34,7 +35,8 @@ public record TransactionResponse(
                 transaction.getDescription(),
                 transaction.getReference(),
                 transaction.getValueDate(),
-                transaction.getReversalReason()
+                transaction.getReversalReason(),
+                transaction.getFailureReason()
         );
     }
 }

@@ -40,7 +40,7 @@ public class Transaction extends AuditableEntity {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 16)
-    private TransactionStatus status = TransactionStatus.POSTED;
+    private TransactionStatus status = TransactionStatus.INITIATED;
 
     @Column(nullable = false, precision = 19, scale = 2)
     private BigDecimal amount;
@@ -59,6 +59,9 @@ public class Transaction extends AuditableEntity {
 
     @Column(length = 255)
     private String reversalReason;
+
+    @Column(length = 255)
+    private String failureReason;
 
     public Transaction() {
     }
@@ -131,11 +134,19 @@ public class Transaction extends AuditableEntity {
         return reversalReason;
     }
 
+    public String getFailureReason() {
+        return failureReason;
+    }
+
     public void setStatus(TransactionStatus status) {
         this.status = status;
     }
 
     public void setReversalReason(String reversalReason) {
         this.reversalReason = reversalReason;
+    }
+
+    public void setFailureReason(String failureReason) {
+        this.failureReason = failureReason;
     }
 }

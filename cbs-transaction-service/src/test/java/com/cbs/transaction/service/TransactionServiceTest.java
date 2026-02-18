@@ -4,6 +4,7 @@ import com.cbs.common.exception.ApiException;
 import com.cbs.transaction.dto.CreateTransactionRequest;
 import com.cbs.transaction.dto.ReverseTransactionRequest;
 import com.cbs.transaction.dto.TransactionResponse;
+import com.cbs.transaction.integration.LedgerPostingClient;
 import com.cbs.transaction.model.Transaction;
 import com.cbs.transaction.model.TransactionStatus;
 import com.cbs.transaction.model.TransactionType;
@@ -19,8 +20,11 @@ import java.time.LocalDate;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -29,11 +33,14 @@ class TransactionServiceTest {
     @Mock
     private TransactionRepository transactionRepository;
 
+    @Mock
+    private LedgerPostingClient ledgerPostingClient;
+
     private TransactionService transactionService;
 
     @BeforeEach
     void setUp() {
-        transactionService = new TransactionService(transactionRepository);
+        transactionService = new TransactionService(transactionRepository, ledgerPostingClient);
     }
 
     @Test
@@ -52,6 +59,7 @@ class TransactionServiceTest {
 
         when(transactionRepository.existsByReference("REF-001")).thenReturn(false);
         when(transactionRepository.save(any(Transaction.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        doNothing().when(ledgerPostingClient).postTransaction(any(Transaction.class));
 
         TransactionResponse response = transactionService.createTransaction(request);
 
@@ -59,6 +67,32 @@ class TransactionServiceTest {
         assertEquals("TRY", response.currency());
         assertEquals("monthly transfer", response.description());
         assertEquals(TransactionStatus.POSTED, response.status());
+    }
+
+    @Test
+    void createTransaction_marksFailedWhenLedgerPostingFails() {
+        CreateTransactionRequest request = new CreateTransactionRequest(
+                1L,
+                10L,
+                20L,
+                TransactionType.PAYMENT,
+                BigDecimal.valueOf(40.50),
+                "TRY",
+                "bill pay",
+                "REF-FAIL",
+                LocalDate.of(2026, 2, 18)
+        );
+
+        when(transactionRepository.existsByReference("REF-FAIL")).thenReturn(false);
+        when(transactionRepository.save(any(Transaction.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        doThrow(new ApiException("LEDGER_POSTING_FAILED", "ledger timeout"))
+                .when(ledgerPostingClient)
+                .postTransaction(any(Transaction.class));
+
+        TransactionResponse response = transactionService.createTransaction(request);
+
+        assertEquals(TransactionStatus.FAILED, response.status());
+        assertEquals("ledger timeout", response.failureReason());
     }
 
     @Test
@@ -139,5 +173,53 @@ class TransactionServiceTest {
 
         assertEquals("TRANSACTION_FAILED", exception.getErrorCode());
         assertEquals("Failed transaction cannot be reversed", exception.getMessage());
+    }
+
+    @Test
+    void retryPosting_postsFailedTransactionWhenLedgerSucceeds() {
+        Transaction transaction = new Transaction(
+                1L,
+                10L,
+                20L,
+                TransactionType.TRANSFER,
+                BigDecimal.valueOf(55.00),
+                "TRY",
+                "retry",
+                "REF-500",
+                LocalDate.of(2026, 2, 18)
+        );
+        transaction.setStatus(TransactionStatus.FAILED);
+        transaction.setFailureReason("timeout");
+
+        when(transactionRepository.findById(50L)).thenReturn(Optional.of(transaction));
+        when(transactionRepository.save(any(Transaction.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        doNothing().when(ledgerPostingClient).postTransaction(any(Transaction.class));
+
+        TransactionResponse response = transactionService.retryPosting(50L);
+
+        assertEquals(TransactionStatus.POSTED, response.status());
+        assertNull(response.failureReason());
+    }
+
+    @Test
+    void retryPosting_throwsWhenTransactionIsNotFailed() {
+        Transaction transaction = new Transaction(
+                1L,
+                10L,
+                null,
+                TransactionType.DEPOSIT,
+                BigDecimal.ONE,
+                "TRY",
+                "x",
+                "REF-501",
+                LocalDate.of(2026, 2, 18)
+        );
+        transaction.setStatus(TransactionStatus.POSTED);
+
+        when(transactionRepository.findById(51L)).thenReturn(Optional.of(transaction));
+
+        ApiException exception = assertThrows(ApiException.class, () -> transactionService.retryPosting(51L));
+
+        assertEquals("TRANSACTION_NOT_FAILED", exception.getErrorCode());
     }
 }

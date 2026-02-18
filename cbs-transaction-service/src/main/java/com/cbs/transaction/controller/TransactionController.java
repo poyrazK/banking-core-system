@@ -61,4 +61,12 @@ public class TransactionController {
         TransactionResponse response = transactionService.reverseTransaction(transactionId, request);
         return ResponseEntity.ok(ApiResponse.success("Transaction reversed", response));
     }
+
+    @PatchMapping("/{transactionId}/retry-posting")
+    public ResponseEntity<ApiResponse<TransactionResponse>> retryPosting(
+            @PathVariable("transactionId") Long transactionId
+    ) {
+        TransactionResponse response = transactionService.retryPosting(transactionId);
+        return ResponseEntity.ok(ApiResponse.success("Transaction posting retried", response));
+    }
 }

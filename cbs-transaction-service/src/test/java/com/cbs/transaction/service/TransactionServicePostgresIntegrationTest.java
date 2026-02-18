@@ -22,7 +22,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest(properties = {
         "eureka.client.enabled=false",
-        "spring.jpa.hibernate.ddl-auto=create-drop"
+    "spring.jpa.hibernate.ddl-auto=create-drop",
+    "ledger.posting.enabled=false"
 })
 class TransactionServicePostgresIntegrationTest {
 
@@ -64,6 +65,7 @@ class TransactionServicePostgresIntegrationTest {
         TransactionResponse response = transactionService.createTransaction(request);
 
         assertEquals("TX-REF-1", response.reference());
+        assertEquals(TransactionStatus.POSTED, response.status());
         assertTrue(transactionRepository.existsByReference("TX-REF-1"));
     }
 

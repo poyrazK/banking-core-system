@@ -52,6 +52,7 @@ class TransactionControllerTest {
                 "Payment",
                 "REF-100",
                 LocalDate.of(2026, 2, 18),
+                null,
                 null
         );
         when(transactionService.createTransaction(any())).thenReturn(response);
@@ -111,8 +112,35 @@ class TransactionControllerTest {
                         .content(body))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.success").value(false))
+                        .andExpect(jsonPath("$.errorCode").value("TRANSACTION_ALREADY_REVERSED"))
                 .andExpect(jsonPath("$.message").value("Transaction is already reversed"));
     }
+
+            @Test
+            void retryPosting_returnsSuccessResponse() throws Exception {
+                TransactionResponse response = new TransactionResponse(
+                        2L,
+                        10L,
+                        20L,
+                        30L,
+                        TransactionType.TRANSFER,
+                        TransactionStatus.POSTED,
+                        BigDecimal.valueOf(100.00),
+                        "TRY",
+                        "Payment",
+                        "REF-200",
+                        LocalDate.of(2026, 2, 18),
+                        null,
+                        null
+                );
+                when(transactionService.retryPosting(2L)).thenReturn(response);
+
+                mockMvc.perform(patch("/api/v1/transactions/{transactionId}/retry-posting", 2))
+                        .andExpect(status().isOk())
+                        .andExpect(jsonPath("$.success").value(true))
+                        .andExpect(jsonPath("$.message").value("Transaction posting retried"))
+                        .andExpect(jsonPath("$.data.reference").value("REF-200"));
+            }
 
     private record ReversalPayload(String reason) {
     }
