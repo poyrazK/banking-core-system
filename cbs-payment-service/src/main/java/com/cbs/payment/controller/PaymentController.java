@@ -75,4 +75,10 @@ public class PaymentController {
         PaymentResponse response = paymentService.cancelPayment(paymentId, request);
         return ResponseEntity.ok(ApiResponse.success("Payment cancelled", response));
     }
+
+    @PatchMapping("/{paymentId}/retry-posting")
+    public ResponseEntity<ApiResponse<PaymentResponse>> retryPosting(@PathVariable("paymentId") Long paymentId) {
+        PaymentResponse response = paymentService.retryPosting(paymentId);
+        return ResponseEntity.ok(ApiResponse.success("Payment posting retried", response));
+    }
 }

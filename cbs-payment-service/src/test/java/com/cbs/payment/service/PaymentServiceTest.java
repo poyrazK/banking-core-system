@@ -4,6 +4,7 @@ import com.cbs.common.exception.ApiException;
 import com.cbs.payment.dto.CreatePaymentRequest;
 import com.cbs.payment.dto.PaymentResponse;
 import com.cbs.payment.dto.PaymentStatusUpdateRequest;
+import com.cbs.payment.integration.LedgerPostingClient;
 import com.cbs.payment.model.Payment;
 import com.cbs.payment.model.PaymentMethod;
 import com.cbs.payment.model.PaymentStatus;
@@ -22,6 +23,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -30,11 +33,14 @@ class PaymentServiceTest {
     @Mock
     private PaymentRepository paymentRepository;
 
+    @Mock
+    private LedgerPostingClient ledgerPostingClient;
+
     private PaymentService paymentService;
 
     @BeforeEach
     void setUp() {
-        paymentService = new PaymentService(paymentRepository);
+        paymentService = new PaymentService(paymentRepository, ledgerPostingClient);
     }
 
     @Test
@@ -53,13 +59,14 @@ class PaymentServiceTest {
 
         when(paymentRepository.existsByReference("PAY-001")).thenReturn(false);
         when(paymentRepository.save(any(Payment.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        doNothing().when(ledgerPostingClient).postPayment(any(Payment.class));
 
         PaymentResponse response = paymentService.createPayment(request);
 
         assertEquals("PAY-001", response.reference());
         assertEquals("TRY", response.currency());
         assertEquals("utility bill", response.description());
-        assertEquals(PaymentStatus.INITIATED, response.status());
+        assertEquals(PaymentStatus.COMPLETED, response.status());
     }
 
     @Test
@@ -80,6 +87,32 @@ class PaymentServiceTest {
         ApiException exception = assertThrows(ApiException.class, () -> paymentService.createPayment(request));
 
         assertEquals("PAYMENT_REFERENCE_EXISTS", exception.getErrorCode());
+    }
+
+    @Test
+    void createPayment_marksFailedWhenLedgerPostingFails() {
+        CreatePaymentRequest request = new CreatePaymentRequest(
+                1L,
+                10L,
+                20L,
+                BigDecimal.valueOf(75.00),
+                "TRY",
+                PaymentMethod.CARD,
+                "PAY-010",
+                "Utility",
+                LocalDate.of(2026, 2, 18)
+        );
+
+        when(paymentRepository.existsByReference("PAY-010")).thenReturn(false);
+        when(paymentRepository.save(any(Payment.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        doThrow(new ApiException("LEDGER_POSTING_FAILED", "ledger unavailable"))
+                .when(ledgerPostingClient)
+                .postPayment(any(Payment.class));
+
+        PaymentResponse response = paymentService.createPayment(request);
+
+        assertEquals(PaymentStatus.FAILED, response.status());
+        assertEquals("ledger unavailable", response.failureReason());
     }
 
     @Test
@@ -116,6 +149,30 @@ class PaymentServiceTest {
 
         assertEquals(PaymentStatus.COMPLETED, response.status());
         assertNull(response.failureReason());
+    }
+
+    @Test
+    void retryPosting_completesFailedPaymentWhenLedgerSucceeds() {
+        Payment payment = createPaymentWithStatus(PaymentStatus.FAILED);
+        payment.setFailureReason("timeout");
+        when(paymentRepository.findById(21L)).thenReturn(Optional.of(payment));
+        when(paymentRepository.save(any(Payment.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        doNothing().when(ledgerPostingClient).postPayment(any(Payment.class));
+
+        PaymentResponse response = paymentService.retryPosting(21L);
+
+        assertEquals(PaymentStatus.COMPLETED, response.status());
+        assertNull(response.failureReason());
+    }
+
+    @Test
+    void retryPosting_throwsWhenPaymentIsNotFailed() {
+        Payment payment = createPaymentWithStatus(PaymentStatus.COMPLETED);
+        when(paymentRepository.findById(22L)).thenReturn(Optional.of(payment));
+
+        ApiException exception = assertThrows(ApiException.class, () -> paymentService.retryPosting(22L));
+
+        assertEquals("PAYMENT_NOT_FAILED", exception.getErrorCode());
     }
 
     private Payment createPaymentWithStatus(PaymentStatus status) {

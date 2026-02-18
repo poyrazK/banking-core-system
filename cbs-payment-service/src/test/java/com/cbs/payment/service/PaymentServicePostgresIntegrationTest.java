@@ -22,7 +22,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest(properties = {
         "eureka.client.enabled=false",
-        "spring.jpa.hibernate.ddl-auto=create-drop"
+    "spring.jpa.hibernate.ddl-auto=create-drop",
+    "ledger.posting.enabled=false"
 })
 class PaymentServicePostgresIntegrationTest {
 

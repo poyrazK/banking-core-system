@@ -4,6 +4,7 @@ import com.cbs.common.exception.ApiException;
 import com.cbs.payment.dto.CreatePaymentRequest;
 import com.cbs.payment.dto.PaymentResponse;
 import com.cbs.payment.dto.PaymentStatusUpdateRequest;
+import com.cbs.payment.integration.LedgerPostingClient;
 import com.cbs.payment.model.Payment;
 import com.cbs.payment.model.PaymentStatus;
 import com.cbs.payment.repository.PaymentRepository;
@@ -17,9 +18,12 @@ import java.util.List;
 public class PaymentService {
 
     private final PaymentRepository paymentRepository;
+    private final LedgerPostingClient ledgerPostingClient;
 
-    public PaymentService(PaymentRepository paymentRepository) {
+    public PaymentService(PaymentRepository paymentRepository,
+                          LedgerPostingClient ledgerPostingClient) {
         this.paymentRepository = paymentRepository;
+        this.ledgerPostingClient = ledgerPostingClient;
     }
 
     @Transactional
@@ -41,7 +45,20 @@ public class PaymentService {
                 request.valueDate()
         );
 
-        return PaymentResponse.from(paymentRepository.save(payment));
+        Payment createdPayment = paymentRepository.save(payment);
+        createdPayment.setStatus(PaymentStatus.PROCESSING);
+        Payment processingPayment = paymentRepository.save(createdPayment);
+
+        try {
+            ledgerPostingClient.postPayment(processingPayment);
+            processingPayment.setStatus(PaymentStatus.COMPLETED);
+            processingPayment.setFailureReason(null);
+        } catch (ApiException exception) {
+            processingPayment.setStatus(PaymentStatus.FAILED);
+            processingPayment.setFailureReason(truncateReason(exception.getMessage()));
+        }
+
+        return PaymentResponse.from(paymentRepository.save(processingPayment));
     }
 
     @Transactional(readOnly = true)
@@ -107,6 +124,30 @@ public class PaymentService {
         return PaymentResponse.from(paymentRepository.save(payment));
     }
 
+    @Transactional
+    public PaymentResponse retryPosting(Long paymentId) {
+        Payment payment = findPayment(paymentId);
+
+        if (payment.getStatus() != PaymentStatus.FAILED) {
+            throw new ApiException("PAYMENT_NOT_FAILED", "Only failed payment can be retried");
+        }
+
+        payment.setStatus(PaymentStatus.PROCESSING);
+        payment.setFailureReason(null);
+        Payment processingPayment = paymentRepository.save(payment);
+
+        try {
+            ledgerPostingClient.postPayment(processingPayment);
+            processingPayment.setStatus(PaymentStatus.COMPLETED);
+            processingPayment.setFailureReason(null);
+        } catch (ApiException exception) {
+            processingPayment.setStatus(PaymentStatus.FAILED);
+            processingPayment.setFailureReason(truncateReason(exception.getMessage()));
+        }
+
+        return PaymentResponse.from(paymentRepository.save(processingPayment));
+    }
+
     private Payment findPayment(Long paymentId) {
         return paymentRepository.findById(paymentId)
                 .orElseThrow(() -> new ApiException("PAYMENT_NOT_FOUND", "Payment not found"));
@@ -134,5 +175,12 @@ public class PaymentService {
 
     private String normalizeReference(String reference) {
         return reference.trim().toUpperCase();
+    }
+
+    private String truncateReason(String reason) {
+        if (reason == null) {
+            return null;
+        }
+        return reason.length() <= 255 ? reason : reason.substring(0, 255);
     }
 }

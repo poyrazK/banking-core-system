@@ -110,7 +110,33 @@ class PaymentControllerTest {
                         .content(body))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.success").value(false))
+                        .andExpect(jsonPath("$.errorCode").value("PAYMENT_ALREADY_COMPLETED"))
                 .andExpect(jsonPath("$.message").value("Completed payment cannot be changed"));
+    }
+
+    @Test
+    void retryPosting_returnsSuccessResponse() throws Exception {
+        PaymentResponse response = new PaymentResponse(
+                5L,
+                10L,
+                20L,
+                30L,
+                BigDecimal.valueOf(200.00),
+                "TRY",
+                PaymentMethod.BANK_TRANSFER,
+                PaymentStatus.COMPLETED,
+                "PAY-200",
+                "Invoice",
+                LocalDate.of(2026, 2, 18),
+                null
+        );
+        when(paymentService.retryPosting(5L)).thenReturn(response);
+
+        mockMvc.perform(patch("/api/v1/payments/{paymentId}/retry-posting", 5))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.message").value("Payment posting retried"))
+                .andExpect(jsonPath("$.data.reference").value("PAY-200"));
     }
 
     private record StatusPayload(String reason) {
