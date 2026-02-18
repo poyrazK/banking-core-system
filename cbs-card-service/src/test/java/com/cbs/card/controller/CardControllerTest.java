@@ -29,86 +29,85 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @Import(CardExceptionHandler.class)
 class CardControllerTest {
 
-    @Autowired
-    private MockMvc mockMvc;
+        @Autowired
+        private MockMvc mockMvc;
 
-    @Autowired
-    private ObjectMapper objectMapper;
+        @Autowired
+        private ObjectMapper objectMapper;
 
-    @MockBean
-    private CardService cardService;
+        @MockBean
+        private CardService cardService;
 
-    @Test
-    void createCard_returnsSuccessResponse() throws Exception {
-        CardResponse response = new CardResponse(
-                1L,
-                10L,
-                20L,
-                "4111111111111111",
-                "TOKEN-1",
-                CardType.DEBIT,
-                CardStatus.NEW,
-                BigDecimal.valueOf(1000),
-                BigDecimal.valueOf(10000),
-                LocalDate.of(2028, 1, 1),
-                null
-        );
-        when(cardService.createCard(any())).thenReturn(response);
+        @Test
+        void createCard_returnsSuccessResponse() throws Exception {
+                CardResponse response = new CardResponse(
+                                1L,
+                                10L,
+                                20L,
+                                "************1111",
+                                "TOKEN-1",
+                                CardType.DEBIT,
+                                CardStatus.NEW,
+                                BigDecimal.valueOf(1000),
+                                BigDecimal.valueOf(10000),
+                                LocalDate.of(2028, 1, 1),
+                                null);
+                when(cardService.createCard(any())).thenReturn(response);
 
-        String body = """
-                {
-                  "customerId": 10,
-                  "accountId": 20,
-                  "cardNumber": "4111111111111111",
-                  "token": "TOKEN-1",
-                  "cardType": "DEBIT",
-                  "dailyLimit": 1000.00,
-                  "monthlyLimit": 10000.00,
-                  "expiryDate": "2028-01-01"
-                }
-                """;
+                String body = """
+                                {
+                                  "customerId": 10,
+                                  "accountId": 20,
+                                  "cardNumber": "4111111111111111",
+                                  "token": "TOKEN-1",
+                                  "cardType": "DEBIT",
+                                  "dailyLimit": 1000.00,
+                                  "monthlyLimit": 10000.00,
+                                  "expiryDate": "2028-01-01"
+                                }
+                                """;
 
-        mockMvc.perform(post("/api/v1/cards")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(body))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.success").value(true))
-                .andExpect(jsonPath("$.message").value("Card created"))
-                .andExpect(jsonPath("$.data.token").value("TOKEN-1"));
-    }
+                mockMvc.perform(post("/api/v1/cards")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(body))
+                                .andExpect(status().isOk())
+                                .andExpect(jsonPath("$.success").value(true))
+                                .andExpect(jsonPath("$.message").value("Card created"))
+                                .andExpect(jsonPath("$.data.token").value("TOKEN-1"));
+        }
 
-    @Test
-    void createCard_returnsBadRequestWhenPayloadIsInvalid() throws Exception {
-        String body = """
-                {
-                  "customerId": 10,
-                  "cardNumber": "",
-                  "cardType": "DEBIT"
-                }
-                """;
+        @Test
+        void createCard_returnsBadRequestWhenPayloadIsInvalid() throws Exception {
+                String body = """
+                                {
+                                  "customerId": 10,
+                                  "cardNumber": "",
+                                  "cardType": "DEBIT"
+                                }
+                                """;
 
-        mockMvc.perform(post("/api/v1/cards")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(body))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.success").value(false));
-    }
+                mockMvc.perform(post("/api/v1/cards")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(body))
+                                .andExpect(status().isBadRequest())
+                                .andExpect(jsonPath("$.success").value(false));
+        }
 
-    @Test
-    void freezeCard_returnsBusinessErrorWhenNotActive() throws Exception {
-        when(cardService.freezeCard(any(), any()))
-                .thenThrow(new ApiException("CARD_NOT_ACTIVE", "Only active cards can be frozen"));
+        @Test
+        void freezeCard_returnsBusinessErrorWhenNotActive() throws Exception {
+                when(cardService.freezeCard(any(), any()))
+                                .thenThrow(new ApiException("CARD_NOT_ACTIVE", "Only active cards can be frozen"));
 
-        String body = objectMapper.writeValueAsString(new ReasonPayload("risk"));
+                String body = objectMapper.writeValueAsString(new ReasonPayload("risk"));
 
-        mockMvc.perform(patch("/api/v1/cards/{cardId}/freeze", 9)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(body))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.success").value(false))
-                .andExpect(jsonPath("$.message").value("Only active cards can be frozen"));
-    }
+                mockMvc.perform(patch("/api/v1/cards/{cardId}/freeze", 9)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(body))
+                                .andExpect(status().isBadRequest())
+                                .andExpect(jsonPath("$.success").value(false))
+                                .andExpect(jsonPath("$.message").value("Only active cards can be frozen"));
+        }
 
-    private record ReasonPayload(String reason) {
-    }
+        private record ReasonPayload(String reason) {
+        }
 }

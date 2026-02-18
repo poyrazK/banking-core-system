@@ -47,15 +47,14 @@ class CardServiceTest {
                 CardType.DEBIT,
                 BigDecimal.valueOf(1000),
                 BigDecimal.valueOf(10000),
-                LocalDate.now().plusYears(2)
-        );
+                LocalDate.now().plusYears(2));
         when(cardRepository.existsByCardNumber("4111111111111111")).thenReturn(false);
         when(cardRepository.existsByToken("TOKEN-1")).thenReturn(false);
         when(cardRepository.save(any(Card.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         CardResponse response = cardService.createCard(request);
 
-        assertEquals("4111111111111111", response.cardNumber());
+        assertEquals("************1111", response.maskedCardNumber());
         assertEquals("TOKEN-1", response.token());
         assertEquals(CardStatus.NEW, response.status());
     }
@@ -70,8 +69,7 @@ class CardServiceTest {
                 CardType.DEBIT,
                 BigDecimal.valueOf(1000),
                 BigDecimal.valueOf(10000),
-                LocalDate.now().plusYears(2)
-        );
+                LocalDate.now().plusYears(2));
         when(cardRepository.existsByCardNumber("4111111111111111")).thenReturn(true);
 
         ApiException exception = assertThrows(ApiException.class, () -> cardService.createCard(request));
@@ -86,8 +84,7 @@ class CardServiceTest {
 
         ApiException exception = assertThrows(
                 ApiException.class,
-                () -> cardService.freezeCard(11L, new CardStatusReasonRequest("risk"))
-        );
+                () -> cardService.freezeCard(11L, new CardStatusReasonRequest("risk")));
 
         assertEquals("CARD_NOT_ACTIVE", exception.getErrorCode());
     }
@@ -99,8 +96,8 @@ class CardServiceTest {
 
         ApiException exception = assertThrows(
                 ApiException.class,
-                () -> cardService.updateLimits(12L, new UpdateCardLimitRequest(BigDecimal.valueOf(2000), BigDecimal.valueOf(20000)))
-        );
+                () -> cardService.updateLimits(12L,
+                        new UpdateCardLimitRequest(BigDecimal.valueOf(2000), BigDecimal.valueOf(20000))));
 
         assertEquals("CARD_LIMIT_UPDATE_NOT_ALLOWED", exception.getErrorCode());
     }
@@ -126,8 +123,7 @@ class CardServiceTest {
                 CardType.DEBIT,
                 BigDecimal.valueOf(1000),
                 BigDecimal.valueOf(10000),
-                LocalDate.now().plusYears(2)
-        );
+                LocalDate.now().plusYears(2));
         card.setStatus(status);
         return card;
     }

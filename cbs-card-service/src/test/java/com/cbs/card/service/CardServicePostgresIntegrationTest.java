@@ -30,8 +30,7 @@ class CardServicePostgresIntegrationTest {
     static void registerDataSource(DynamicPropertyRegistry registry) {
         registry.add("spring.datasource.url", () -> System.getProperty(
                 "it.db.url",
-                "jdbc:postgresql://localhost:55440/cbs_card_it"
-        ));
+                "jdbc:postgresql://localhost:55440/cbs_card_it"));
         registry.add("spring.datasource.username", () -> System.getProperty("it.db.username", "test"));
         registry.add("spring.datasource.password", () -> System.getProperty("it.db.password", "test"));
     }
@@ -57,10 +56,9 @@ class CardServicePostgresIntegrationTest {
                 CardType.DEBIT,
                 BigDecimal.valueOf(1000),
                 BigDecimal.valueOf(10000),
-                LocalDate.now().plusYears(2)
-        ));
+                LocalDate.now().plusYears(2)));
 
-        assertEquals("4111111111111111", response.cardNumber());
+        assertEquals("************1111", response.maskedCardNumber());
         assertEquals("TOKEN-1", response.token());
         assertTrue(cardRepository.existsByCardNumber("4111111111111111"));
     }
@@ -75,8 +73,7 @@ class CardServicePostgresIntegrationTest {
                 CardType.CREDIT,
                 BigDecimal.valueOf(2000),
                 BigDecimal.valueOf(20000),
-                LocalDate.now().plusYears(3)
-        ));
+                LocalDate.now().plusYears(3)));
 
         cardService.activateCard(created.id());
         CardResponse blocked = cardService.blockCard(created.id(), new CardStatusReasonRequest(" suspicious "));
