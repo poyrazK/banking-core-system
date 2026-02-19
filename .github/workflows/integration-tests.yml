@@ -40,13 +40,7 @@ jobs:
             db: "cbs_notification_it"
           - module: "cbs-reporting-service"
             db: "cbs_reporting_it"
-          # These don't need a custom DB but have integration tests
-          - module: "cbs-config-server"
-            db: "postgres"
-          - module: "cbs-discovery-server"
-            db: "postgres"
-          - module: "cbs-api-gateway"
-            db: "postgres"
+
 
     services:
       postgres:
