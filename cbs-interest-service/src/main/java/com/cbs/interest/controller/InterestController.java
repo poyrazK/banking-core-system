@@ -24,7 +24,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/v1/interest")
+@RequestMapping("/api/v1/interests")
 @Tag(name = "Interest", description = "Endpoints for interest rate configuration and calculations")
 public class InterestController {
 

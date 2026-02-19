@@ -65,7 +65,7 @@ jobs:
         ports:
           - 5432:5432
         options: >-
-          --health-cmd pg_isready
+          --health-cmd "pg_isready -U test"
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
@@ -94,20 +94,22 @@ jobs:
             --spring.datasource.username=test \
             --spring.datasource.password=test \
             --eureka.client.enabled=false \
-            --spring.cloud.config.enabled=false \
-            --spring.kafka.bootstrap-servers=localhost:9092 &
+            --spring.cloud.config.enabled=false > service.log 2>&1 &
           
           echo "Waiting for service to start..."
-          for i in {1..60}; do
-            if curl -s http://localhost:${{ matrix.port }}/actuator/health | grep "UP"; then
+          for i in {1..40}; do
+            STATUS=$(curl -s http://localhost:${{ matrix.port }}/actuator/health | jq -r '.status' || echo "STARTING")
+            echo "Attempt $i: Health status is $STATUS"
+            if [ "$STATUS" == "UP" ]; then
               echo "Service is UP!"
               exit 0
             fi
-            sleep 2
+            sleep 3
           done
-          echo "Service failed to start"
+          echo "Service failed to start. Logs:"
+          cat service.log
           exit 1
-        timeout-minutes: 3
+        timeout-minutes: 5
 
       - name: Validate OpenAPI Spec
         run: |

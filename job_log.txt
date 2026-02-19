@@ -1,0 +1,508 @@
+﻿2026-02-19T10:14:08.6956271Z Current runner version: '2.331.0'
+2026-02-19T10:14:08.6988943Z ##[group]Runner Image Provisioner
+2026-02-19T10:14:08.6990193Z Hosted Compute Agent
+2026-02-19T10:14:08.6990991Z Version: 20260123.484
+2026-02-19T10:14:08.6991760Z Commit: 6bd6555ca37d84114959e1c76d2c01448ff61c5d
+2026-02-19T10:14:08.6992892Z Build Date: 2026-01-23T19:41:17Z
+2026-02-19T10:14:08.6993834Z Worker ID: {a0b45f28-76f0-400b-a512-a09efdb1666c}
+2026-02-19T10:14:08.6994854Z Azure Region: westus3
+2026-02-19T10:14:08.6995568Z ##[endgroup]
+2026-02-19T10:14:08.6997987Z ##[group]Operating System
+2026-02-19T10:14:08.6998790Z Ubuntu
+2026-02-19T10:14:08.6999422Z 24.04.3
+2026-02-19T10:14:08.7000169Z LTS
+2026-02-19T10:14:08.7000823Z ##[endgroup]
+2026-02-19T10:14:08.7001494Z ##[group]Runner Image
+2026-02-19T10:14:08.7002310Z Image: ubuntu-24.04
+2026-02-19T10:14:08.7003041Z Version: 20260209.23.1
+2026-02-19T10:14:08.7004799Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20260209.23/images/ubuntu/Ubuntu2404-Readme.md
+2026-02-19T10:14:08.7007461Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20260209.23
+2026-02-19T10:14:08.7008774Z ##[endgroup]
+2026-02-19T10:14:08.7010427Z ##[group]GITHUB_TOKEN Permissions
+2026-02-19T10:14:08.7012922Z Contents: read
+2026-02-19T10:14:08.7013798Z Metadata: read
+2026-02-19T10:14:08.7014499Z Packages: read
+2026-02-19T10:14:08.7015139Z ##[endgroup]
+2026-02-19T10:14:08.7018366Z Secret source: Actions
+2026-02-19T10:14:08.7019370Z Prepare workflow directory
+2026-02-19T10:14:08.7778344Z Prepare all required actions
+2026-02-19T10:14:08.7834553Z Getting action download info
+2026-02-19T10:14:09.3501180Z Download action repository 'actions/checkout@v4' (SHA:34e114876b0b11c390a56381ad16ebd13914f8d5)
+2026-02-19T10:14:09.4900589Z Download action repository 'actions/setup-java@v4' (SHA:c1e323688fd81a25caa38c78aa6df2d33d3e20d9)
+2026-02-19T10:14:11.3772234Z Complete job name: cbs-account-service (Swagger)
+2026-02-19T10:14:11.4157824Z ##[group]Checking docker version
+2026-02-19T10:14:11.4170299Z ##[command]/usr/bin/docker version --format '{{.Server.APIVersion}}'
+2026-02-19T10:14:11.5066555Z '1.52'
+2026-02-19T10:14:11.5073427Z Docker daemon API version: '1.52'
+2026-02-19T10:14:11.5073986Z ##[command]/usr/bin/docker version --format '{{.Client.APIVersion}}'
+2026-02-19T10:14:11.5223838Z '1.52'
+2026-02-19T10:14:11.5232419Z Docker client API version: '1.52'
+2026-02-19T10:14:11.5237760Z ##[endgroup]
+2026-02-19T10:14:11.5240047Z ##[group]Clean up resources from previous jobs
+2026-02-19T10:14:11.5244862Z ##[command]/usr/bin/docker ps --all --quiet --no-trunc --filter "label=463eba"
+2026-02-19T10:14:11.5374568Z ##[command]/usr/bin/docker network prune --force --filter "label=463eba"
+2026-02-19T10:14:11.5499798Z ##[endgroup]
+2026-02-19T10:14:11.5500423Z ##[group]Create local container network
+2026-02-19T10:14:11.5511100Z ##[command]/usr/bin/docker network create --label 463eba github_network_4f5c264c429b4927bf4c42fd3d6ae55b
+2026-02-19T10:14:11.6029503Z a11da87d2de899621617231862ee33c6d819040d1fe7e71de5441141faa71279
+2026-02-19T10:14:11.6063137Z ##[endgroup]
+2026-02-19T10:14:11.6088590Z ##[group]Starting postgres service container
+2026-02-19T10:14:11.6108525Z ##[command]/usr/bin/docker pull postgres:16
+2026-02-19T10:14:12.3177518Z 16: Pulling from library/postgres
+2026-02-19T10:14:12.7388724Z 0c8d55a45c0d: Pulling fs layer
+2026-02-19T10:14:12.7394660Z 4a4ffd5284ad: Pulling fs layer
+2026-02-19T10:14:12.7395359Z 672b38b519e3: Pulling fs layer
+2026-02-19T10:14:12.7396032Z 006e4628b174: Pulling fs layer
+2026-02-19T10:14:12.7397147Z 3e9da9a39d38: Pulling fs layer
+2026-02-19T10:14:12.7397685Z 11c7e7ae7017: Pulling fs layer
+2026-02-19T10:14:12.7398224Z 05469d57f587: Pulling fs layer
+2026-02-19T10:14:12.7398698Z 023a0ad09ee9: Pulling fs layer
+2026-02-19T10:14:12.7399168Z 98b8196d5fac: Pulling fs layer
+2026-02-19T10:14:12.7399609Z 4e9ec76c49bc: Pulling fs layer
+2026-02-19T10:14:12.7400143Z 293fe20c06d4: Pulling fs layer
+2026-02-19T10:14:12.7400618Z ce80fc5ff389: Pulling fs layer
+2026-02-19T10:14:12.7401037Z 646fe7da0dff: Pulling fs layer
+2026-02-19T10:14:12.7401729Z 453125fb7241: Pulling fs layer
+2026-02-19T10:14:12.8330712Z 4a4ffd5284ad: Download complete
+2026-02-19T10:14:12.9277150Z 006e4628b174: Download complete
+2026-02-19T10:14:12.9290336Z 646fe7da0dff: Download complete
+2026-02-19T10:14:12.9430013Z 293fe20c06d4: Download complete
+2026-02-19T10:14:13.0299642Z 453125fb7241: Download complete
+2026-02-19T10:14:13.0371851Z d272ffb22f04: Download complete
+2026-02-19T10:14:13.0407205Z 4e9ec76c49bc: Download complete
+2026-02-19T10:14:13.0418605Z ce80fc5ff389: Download complete
+2026-02-19T10:14:13.0450009Z 3e9da9a39d38: Download complete
+2026-02-19T10:14:13.0480095Z 98b8196d5fac: Download complete
+2026-02-19T10:14:13.1255432Z 023a0ad09ee9: Download complete
+2026-02-19T10:14:13.1264820Z 6b07fc76fde1: Download complete
+2026-02-19T10:14:13.1265294Z 672b38b519e3: Download complete
+2026-02-19T10:14:13.1265719Z 11c7e7ae7017: Download complete
+2026-02-19T10:14:13.2263902Z 0c8d55a45c0d: Download complete
+2026-02-19T10:14:14.1263874Z 05469d57f587: Download complete
+2026-02-19T10:14:14.2260196Z 006e4628b174: Pull complete
+2026-02-19T10:14:14.2345177Z 0c8d55a45c0d: Pull complete
+2026-02-19T10:14:14.3314482Z 3e9da9a39d38: Pull complete
+2026-02-19T10:14:14.3335596Z 672b38b519e3: Pull complete
+2026-02-19T10:14:14.5285185Z 98b8196d5fac: Pull complete
+2026-02-19T10:14:14.5294322Z 023a0ad09ee9: Pull complete
+2026-02-19T10:14:14.5302418Z 11c7e7ae7017: Pull complete
+2026-02-19T10:14:14.6278850Z 453125fb7241: Pull complete
+2026-02-19T10:14:16.6259138Z 646fe7da0dff: Pull complete
+2026-02-19T10:14:16.6266926Z 293fe20c06d4: Pull complete
+2026-02-19T10:14:16.6274874Z 4e9ec76c49bc: Pull complete
+2026-02-19T10:14:16.6285134Z ce80fc5ff389: Pull complete
+2026-02-19T10:14:16.6288093Z 05469d57f587: Pull complete
+2026-02-19T10:14:16.6459245Z 4a4ffd5284ad: Pull complete
+2026-02-19T10:14:16.6463368Z Digest: sha256:e4842c8a99ca99339e1693e6fe5fe62c7becb31991f066f989047dfb2fbf47af
+2026-02-19T10:14:16.6464338Z Status: Downloaded newer image for postgres:16
+2026-02-19T10:14:16.6467710Z docker.io/library/postgres:16
+2026-02-19T10:14:16.6528427Z ##[command]/usr/bin/docker create --name 00b4b9b69dac4e00921a357d7a17409a_postgres16_3ac692 --label 463eba --network github_network_4f5c264c429b4927bf4c42fd3d6ae55b --network-alias postgres -p 5432:5432 --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5 -e "POSTGRES_USER=test" -e "POSTGRES_PASSWORD=test" -e "POSTGRES_DB=postgres" -e GITHUB_ACTIONS=true -e CI=true postgres:16
+2026-02-19T10:14:19.9916619Z afa1eb376f9861470f9c6df4bba42bc42d94f1073b07f508ca1dba0ae3da7698
+2026-02-19T10:14:19.9938798Z ##[command]/usr/bin/docker start afa1eb376f9861470f9c6df4bba42bc42d94f1073b07f508ca1dba0ae3da7698
+2026-02-19T10:14:20.1862501Z afa1eb376f9861470f9c6df4bba42bc42d94f1073b07f508ca1dba0ae3da7698
+2026-02-19T10:14:20.1887342Z ##[command]/usr/bin/docker ps --all --filter id=afa1eb376f9861470f9c6df4bba42bc42d94f1073b07f508ca1dba0ae3da7698 --filter status=running --no-trunc --format "{{.ID}} {{.Status}}"
+2026-02-19T10:14:20.2206892Z afa1eb376f9861470f9c6df4bba42bc42d94f1073b07f508ca1dba0ae3da7698 Up Less than a second (health: starting)
+2026-02-19T10:14:20.2260885Z ##[command]/usr/bin/docker port afa1eb376f9861470f9c6df4bba42bc42d94f1073b07f508ca1dba0ae3da7698
+2026-02-19T10:14:20.2441415Z 5432/tcp -> 0.0.0.0:5432
+2026-02-19T10:14:20.2446003Z 5432/tcp -> [::]:5432
+2026-02-19T10:14:20.2507911Z ##[endgroup]
+2026-02-19T10:14:20.2521112Z ##[group]Waiting for all services to be ready
+2026-02-19T10:14:20.2540664Z ##[command]/usr/bin/docker inspect --format="{{if .Config.Healthcheck}}{{print .State.Health.Status}}{{end}}" afa1eb376f9861470f9c6df4bba42bc42d94f1073b07f508ca1dba0ae3da7698
+2026-02-19T10:14:20.2733808Z starting
+2026-02-19T10:14:20.2761334Z postgres service is starting, waiting 2 seconds before checking again.
+2026-02-19T10:14:22.2759601Z ##[command]/usr/bin/docker inspect --format="{{if .Config.Healthcheck}}{{print .State.Health.Status}}{{end}}" afa1eb376f9861470f9c6df4bba42bc42d94f1073b07f508ca1dba0ae3da7698
+2026-02-19T10:14:22.2888633Z starting
+2026-02-19T10:14:22.2898827Z postgres service is starting, waiting 4 seconds before checking again.
+2026-02-19T10:14:26.3172917Z ##[command]/usr/bin/docker inspect --format="{{if .Config.Healthcheck}}{{print .State.Health.Status}}{{end}}" afa1eb376f9861470f9c6df4bba42bc42d94f1073b07f508ca1dba0ae3da7698
+2026-02-19T10:14:26.3307774Z starting
+2026-02-19T10:14:26.3317573Z postgres service is starting, waiting 8 seconds before checking again.
+2026-02-19T10:14:34.7940087Z ##[command]/usr/bin/docker inspect --format="{{if .Config.Healthcheck}}{{print .State.Health.Status}}{{end}}" afa1eb376f9861470f9c6df4bba42bc42d94f1073b07f508ca1dba0ae3da7698
+2026-02-19T10:14:34.8075366Z healthy
+2026-02-19T10:14:34.8087310Z postgres service is healthy.
+2026-02-19T10:14:34.8087949Z ##[endgroup]
+2026-02-19T10:14:34.8328875Z ##[group]Run actions/checkout@v4
+2026-02-19T10:14:34.8329314Z with:
+2026-02-19T10:14:34.8329520Z   repository: poyrazK/banking-core-system
+2026-02-19T10:14:34.8329933Z   token: ***
+2026-02-19T10:14:34.8330115Z   ssh-strict: true
+2026-02-19T10:14:34.8330294Z   ssh-user: git
+2026-02-19T10:14:34.8330482Z   persist-credentials: true
+2026-02-19T10:14:34.8330687Z   clean: true
+2026-02-19T10:14:34.8330864Z   sparse-checkout-cone-mode: true
+2026-02-19T10:14:34.8331087Z   fetch-depth: 1
+2026-02-19T10:14:34.8331250Z   fetch-tags: false
+2026-02-19T10:14:34.8331427Z   show-progress: true
+2026-02-19T10:14:34.8331596Z   lfs: false
+2026-02-19T10:14:34.8331753Z   submodules: false
+2026-02-19T10:14:34.8331939Z   set-safe-directory: true
+2026-02-19T10:14:34.8332266Z ##[endgroup]
+2026-02-19T10:14:34.9390493Z Syncing repository: poyrazK/banking-core-system
+2026-02-19T10:14:34.9392435Z ##[group]Getting Git version info
+2026-02-19T10:14:34.9393684Z Working directory is '/home/runner/work/banking-core-system/banking-core-system'
+2026-02-19T10:14:34.9395103Z [command]/usr/bin/git version
+2026-02-19T10:14:34.9412167Z git version 2.52.0
+2026-02-19T10:14:34.9436417Z ##[endgroup]
+2026-02-19T10:14:34.9451436Z Temporarily overriding HOME='/home/runner/work/_temp/257894db-87c2-48a4-ab87-dc82788af19d' before making global git config changes
+2026-02-19T10:14:34.9454304Z Adding repository directory to the temporary git global config as a safe directory
+2026-02-19T10:14:34.9458952Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/banking-core-system/banking-core-system
+2026-02-19T10:14:34.9499598Z Deleting the contents of '/home/runner/work/banking-core-system/banking-core-system'
+2026-02-19T10:14:34.9503914Z ##[group]Initializing the repository
+2026-02-19T10:14:34.9508921Z [command]/usr/bin/git init /home/runner/work/banking-core-system/banking-core-system
+2026-02-19T10:14:34.9600250Z hint: Using 'master' as the name for the initial branch. This default branch name
+2026-02-19T10:14:34.9601867Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+2026-02-19T10:14:34.9602802Z hint: to use in all of your new repositories, which will suppress this warning,
+2026-02-19T10:14:34.9604159Z hint: call:
+2026-02-19T10:14:34.9604401Z hint:
+2026-02-19T10:14:34.9605141Z hint: 	git config --global init.defaultBranch <name>
+2026-02-19T10:14:34.9605636Z hint:
+2026-02-19T10:14:34.9606243Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+2026-02-19T10:14:34.9607057Z hint: 'development'. The just-created branch can be renamed via this command:
+2026-02-19T10:14:34.9607611Z hint:
+2026-02-19T10:14:34.9607886Z hint: 	git branch -m <name>
+2026-02-19T10:14:34.9608192Z hint:
+2026-02-19T10:14:34.9608697Z hint: Disable this message with "git config set advice.defaultBranchName false"
+2026-02-19T10:14:34.9610203Z Initialized empty Git repository in /home/runner/work/banking-core-system/banking-core-system/.git/
+2026-02-19T10:14:34.9620268Z [command]/usr/bin/git remote add origin https://github.com/poyrazK/banking-core-system
+2026-02-19T10:14:34.9654309Z ##[endgroup]
+2026-02-19T10:14:34.9655692Z ##[group]Disabling automatic garbage collection
+2026-02-19T10:14:34.9658940Z [command]/usr/bin/git config --local gc.auto 0
+2026-02-19T10:14:34.9686310Z ##[endgroup]
+2026-02-19T10:14:34.9687666Z ##[group]Setting up auth
+2026-02-19T10:14:34.9693720Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-02-19T10:14:34.9721555Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-02-19T10:14:35.0038599Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-02-19T10:14:35.0066481Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-02-19T10:14:35.0250048Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-02-19T10:14:35.0286944Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-02-19T10:14:35.0478579Z [command]/usr/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***
+2026-02-19T10:14:35.0510395Z ##[endgroup]
+2026-02-19T10:14:35.0511687Z ##[group]Fetching the repository
+2026-02-19T10:14:35.0520330Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +47d9bb0a22354041ddb809c4b72739884a30c27a:refs/remotes/pull/3/merge
+2026-02-19T10:14:35.6381329Z From https://github.com/poyrazK/banking-core-system
+2026-02-19T10:14:35.6382724Z  * [new ref]         47d9bb0a22354041ddb809c4b72739884a30c27a -> pull/3/merge
+2026-02-19T10:14:35.6412043Z ##[endgroup]
+2026-02-19T10:14:35.6412605Z ##[group]Determining the checkout info
+2026-02-19T10:14:35.6414078Z ##[endgroup]
+2026-02-19T10:14:35.6419574Z [command]/usr/bin/git sparse-checkout disable
+2026-02-19T10:14:35.6457832Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+2026-02-19T10:14:35.6481472Z ##[group]Checking out the ref
+2026-02-19T10:14:35.6485707Z [command]/usr/bin/git checkout --progress --force refs/remotes/pull/3/merge
+2026-02-19T10:14:35.6668744Z Note: switching to 'refs/remotes/pull/3/merge'.
+2026-02-19T10:14:35.6669205Z 
+2026-02-19T10:14:35.6671321Z You are in 'detached HEAD' state. You can look around, make experimental
+2026-02-19T10:14:35.6672475Z changes and commit them, and you can discard any commits you make in this
+2026-02-19T10:14:35.6674281Z state without impacting any branches by switching back to a branch.
+2026-02-19T10:14:35.6674698Z 
+2026-02-19T10:14:35.6674967Z If you want to create a new branch to retain commits you create, you may
+2026-02-19T10:14:35.6675628Z do so (now or later) by using -c with the switch command. Example:
+2026-02-19T10:14:35.6676221Z 
+2026-02-19T10:14:35.6676498Z   git switch -c <new-branch-name>
+2026-02-19T10:14:35.6676878Z 
+2026-02-19T10:14:35.6677117Z Or undo this operation with:
+2026-02-19T10:14:35.6677443Z 
+2026-02-19T10:14:35.6677552Z   git switch -
+2026-02-19T10:14:35.6694169Z 
+2026-02-19T10:14:35.6694648Z Turn off this advice by setting config variable advice.detachedHead to false
+2026-02-19T10:14:35.6695184Z 
+2026-02-19T10:14:35.6695746Z HEAD is now at 47d9bb0 Merge b56f33e32bc2f062aafc84f3f5e626186a739edf into 7efb1bef0481694afc186b2339968d0ca3acbcb6
+2026-02-19T10:14:35.6697756Z ##[endgroup]
+2026-02-19T10:14:35.6720929Z [command]/usr/bin/git log -1 --format=%H
+2026-02-19T10:14:35.6741383Z 47d9bb0a22354041ddb809c4b72739884a30c27a
+2026-02-19T10:14:35.6946617Z ##[group]Run actions/setup-java@v4
+2026-02-19T10:14:35.6946869Z with:
+2026-02-19T10:14:35.6947034Z   java-version: 17
+2026-02-19T10:14:35.6947216Z   distribution: temurin
+2026-02-19T10:14:35.6947397Z   cache: maven
+2026-02-19T10:14:35.6947568Z   java-package: jdk
+2026-02-19T10:14:35.6947742Z   check-latest: false
+2026-02-19T10:14:35.6947926Z   server-id: github
+2026-02-19T10:14:35.6948112Z   server-username: GITHUB_ACTOR
+2026-02-19T10:14:35.6948447Z   server-password: GITHUB_TOKEN
+2026-02-19T10:14:35.6948664Z   overwrite-settings: true
+2026-02-19T10:14:35.6948865Z   job-status: success
+2026-02-19T10:14:35.6949194Z   token: ***
+2026-02-19T10:14:35.6949352Z ##[endgroup]
+2026-02-19T10:14:35.8976069Z ##[group]Installed distributions
+2026-02-19T10:14:35.9258191Z Resolved Java 17.0.18+8 from tool-cache
+2026-02-19T10:14:35.9266647Z Setting Java 17.0.18+8 as the default
+2026-02-19T10:14:35.9280228Z Creating toolchains.xml for JDK version 17 from temurin
+2026-02-19T10:14:35.9395741Z Writing to /home/runner/.m2/toolchains.xml
+2026-02-19T10:14:35.9406476Z 
+2026-02-19T10:14:35.9406880Z Java configuration:
+2026-02-19T10:14:35.9407239Z   Distribution: temurin
+2026-02-19T10:14:35.9407580Z   Version: 17.0.18+8
+2026-02-19T10:14:35.9408072Z   Path: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.18-8/x64
+2026-02-19T10:14:35.9408523Z 
+2026-02-19T10:14:35.9408963Z ##[endgroup]
+2026-02-19T10:14:35.9424930Z Creating settings.xml with server-id: github
+2026-02-19T10:14:35.9444181Z Writing to /home/runner/.m2/settings.xml
+2026-02-19T10:14:36.2903964Z Cache hit for: setup-java-Linux-x64-maven-c29747fd5794339cc5cf53be0e483f2ca30a658c542085ac06b2e1d6b2855521
+2026-02-19T10:14:37.5352762Z Received 54525952 of 90941473 (60.0%), 51.9 MBs/sec
+2026-02-19T10:14:37.7552189Z Received 90941473 of 90941473 (100.0%), 71.1 MBs/sec
+2026-02-19T10:14:37.7552738Z Cache Size: ~87 MB (90941473 B)
+2026-02-19T10:14:37.7577988Z [command]/usr/bin/tar -xf /home/runner/work/_temp/5e0cb913-de72-4c9c-83e4-4b0ef273b811/cache.tzst -P -C /home/runner/work/banking-core-system/banking-core-system --use-compress-program unzstd
+2026-02-19T10:14:37.9434274Z Cache restored successfully
+2026-02-19T10:14:37.9564496Z Cache restored from key: setup-java-Linux-x64-maven-c29747fd5794339cc5cf53be0e483f2ca30a658c542085ac06b2e1d6b2855521
+2026-02-19T10:14:37.9709088Z ##[group]Run sudo apt-get update && sudo apt-get install -y postgresql-client
+2026-02-19T10:14:37.9709629Z [36;1msudo apt-get update && sudo apt-get install -y postgresql-client[0m
+2026-02-19T10:14:37.9710172Z [36;1mPGPASSWORD=test psql -h localhost -U test -d postgres -c "CREATE DATABASE cbs_account_it;"[0m
+2026-02-19T10:14:37.9742068Z shell: /usr/bin/bash -e {0}
+2026-02-19T10:14:37.9742309Z env:
+2026-02-19T10:14:37.9742588Z   JAVA_HOME: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.18-8/x64
+2026-02-19T10:14:37.9743044Z   JAVA_HOME_17_X64: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.18-8/x64
+2026-02-19T10:14:37.9743385Z ##[endgroup]
+2026-02-19T10:14:38.0568062Z Get:1 file:/etc/apt/apt-mirrors.txt Mirrorlist [144 B]
+2026-02-19T10:14:38.1110713Z Hit:2 http://azure.archive.ubuntu.com/ubuntu noble InRelease
+2026-02-19T10:14:38.1113441Z Get:6 https://packages.microsoft.com/repos/azure-cli noble InRelease [3564 B]
+2026-02-19T10:14:38.1129141Z Get:7 https://packages.microsoft.com/ubuntu/24.04/prod noble InRelease [3600 B]
+2026-02-19T10:14:38.1138887Z Get:3 http://azure.archive.ubuntu.com/ubuntu noble-updates InRelease [126 kB]
+2026-02-19T10:14:38.1258703Z Get:4 http://azure.archive.ubuntu.com/ubuntu noble-backports InRelease [126 kB]
+2026-02-19T10:14:38.1311441Z Get:5 http://azure.archive.ubuntu.com/ubuntu noble-security InRelease [126 kB]
+2026-02-19T10:14:38.3228191Z Get:8 https://packages.microsoft.com/repos/azure-cli noble/main amd64 Packages [2129 B]
+2026-02-19T10:14:38.3607307Z Get:9 https://packages.microsoft.com/ubuntu/24.04/prod noble/main armhf Packages [11.4 kB]
+2026-02-19T10:14:38.3639440Z Get:10 https://packages.microsoft.com/ubuntu/24.04/prod noble/main amd64 Packages [91.6 kB]
+2026-02-19T10:14:38.3717591Z Get:11 https://packages.microsoft.com/ubuntu/24.04/prod noble/main all Packages [643 B]
+2026-02-19T10:14:38.3758300Z Get:12 https://packages.microsoft.com/ubuntu/24.04/prod noble/main arm64 Packages [71.0 kB]
+2026-02-19T10:14:38.4019547Z Get:13 http://azure.archive.ubuntu.com/ubuntu noble-updates/main amd64 Packages [1771 kB]
+2026-02-19T10:14:38.4103217Z Get:14 http://azure.archive.ubuntu.com/ubuntu noble-updates/main Translation-en [328 kB]
+2026-02-19T10:14:38.4147840Z Get:15 http://azure.archive.ubuntu.com/ubuntu noble-updates/main amd64 Components [175 kB]
+2026-02-19T10:14:38.4157251Z Get:16 http://azure.archive.ubuntu.com/ubuntu noble-updates/main amd64 c-n-f Metadata [16.5 kB]
+2026-02-19T10:14:38.4180172Z Get:17 http://azure.archive.ubuntu.com/ubuntu noble-updates/universe amd64 Packages [1556 kB]
+2026-02-19T10:14:38.4344529Z Get:18 http://azure.archive.ubuntu.com/ubuntu noble-updates/universe Translation-en [315 kB]
+2026-02-19T10:14:38.4350979Z Get:19 http://azure.archive.ubuntu.com/ubuntu noble-updates/universe amd64 Components [386 kB]
+2026-02-19T10:14:38.4417325Z Get:20 http://azure.archive.ubuntu.com/ubuntu noble-updates/universe amd64 c-n-f Metadata [32.6 kB]
+2026-02-19T10:14:38.4430288Z Get:21 http://azure.archive.ubuntu.com/ubuntu noble-updates/restricted amd64 Packages [2663 kB]
+2026-02-19T10:14:38.4769846Z Get:22 http://azure.archive.ubuntu.com/ubuntu noble-updates/restricted Translation-en [613 kB]
+2026-02-19T10:14:38.5179524Z Get:23 http://azure.archive.ubuntu.com/ubuntu noble-updates/restricted amd64 Components [212 B]
+2026-02-19T10:14:38.5197213Z Get:24 http://azure.archive.ubuntu.com/ubuntu noble-updates/multiverse amd64 Components [940 B]
+2026-02-19T10:14:38.5220385Z Get:25 http://azure.archive.ubuntu.com/ubuntu noble-backports/main amd64 Components [7312 B]
+2026-02-19T10:14:38.5227136Z Get:26 http://azure.archive.ubuntu.com/ubuntu noble-backports/universe amd64 Components [10.5 kB]
+2026-02-19T10:14:38.5237470Z Get:27 http://azure.archive.ubuntu.com/ubuntu noble-backports/restricted amd64 Components [216 B]
+2026-02-19T10:14:38.5240161Z Get:28 http://azure.archive.ubuntu.com/ubuntu noble-backports/multiverse amd64 Components [212 B]
+2026-02-19T10:14:38.5388463Z Get:29 http://azure.archive.ubuntu.com/ubuntu noble-security/main amd64 Packages [1472 kB]
+2026-02-19T10:14:38.5468100Z Get:30 http://azure.archive.ubuntu.com/ubuntu noble-security/main Translation-en [237 kB]
+2026-02-19T10:14:38.5491330Z Get:31 http://azure.archive.ubuntu.com/ubuntu noble-security/main amd64 Components [21.5 kB]
+2026-02-19T10:14:38.5503918Z Get:32 http://azure.archive.ubuntu.com/ubuntu noble-security/main amd64 c-n-f Metadata [9892 B]
+2026-02-19T10:14:38.5516169Z Get:33 http://azure.archive.ubuntu.com/ubuntu noble-security/universe amd64 Packages [935 kB]
+2026-02-19T10:14:38.5571941Z Get:34 http://azure.archive.ubuntu.com/ubuntu noble-security/universe Translation-en [214 kB]
+2026-02-19T10:14:38.5595233Z Get:35 http://azure.archive.ubuntu.com/ubuntu noble-security/universe amd64 Components [74.2 kB]
+2026-02-19T10:14:38.5610030Z Get:36 http://azure.archive.ubuntu.com/ubuntu noble-security/universe amd64 c-n-f Metadata [20.0 kB]
+2026-02-19T10:14:38.6124210Z Get:37 http://azure.archive.ubuntu.com/ubuntu noble-security/restricted amd64 Packages [2510 kB]
+2026-02-19T10:14:38.6355563Z Get:38 http://azure.archive.ubuntu.com/ubuntu noble-security/restricted Translation-en [581 kB]
+2026-02-19T10:14:38.6398234Z Get:39 http://azure.archive.ubuntu.com/ubuntu noble-security/restricted amd64 Components [212 B]
+2026-02-19T10:14:38.6401666Z Get:40 http://azure.archive.ubuntu.com/ubuntu noble-security/multiverse amd64 Components [212 B]
+2026-02-19T10:14:44.1400418Z Fetched 14.5 MB in 2s (7522 kB/s)
+2026-02-19T10:14:44.9231001Z Reading package lists...
+2026-02-19T10:14:44.9557106Z Reading package lists...
+2026-02-19T10:14:45.1309832Z Building dependency tree...
+2026-02-19T10:14:45.1317171Z Reading state information...
+2026-02-19T10:14:45.3065533Z The following NEW packages will be installed:
+2026-02-19T10:14:45.3068838Z   postgresql-client
+2026-02-19T10:14:45.3231655Z 0 upgraded, 1 newly installed, 0 to remove and 81 not upgraded.
+2026-02-19T10:14:45.3232243Z Need to get 11.6 kB of archives.
+2026-02-19T10:14:45.3232754Z After this operation, 17.4 kB of additional disk space will be used.
+2026-02-19T10:14:45.3233421Z Get:1 file:/etc/apt/apt-mirrors.txt Mirrorlist [144 B]
+2026-02-19T10:14:45.3830544Z Get:2 http://azure.archive.ubuntu.com/ubuntu noble-updates/main amd64 postgresql-client all 16+257build1.1 [11.6 kB]
+2026-02-19T10:14:45.6398682Z Fetched 11.6 kB in 0s (167 kB/s)
+2026-02-19T10:14:45.6621121Z Selecting previously unselected package postgresql-client.
+2026-02-19T10:14:45.6931948Z (Reading database ... 
+2026-02-19T10:14:45.6932378Z (Reading database ... 5%
+2026-02-19T10:14:45.6932734Z (Reading database ... 10%
+2026-02-19T10:14:45.6933095Z (Reading database ... 15%
+2026-02-19T10:14:45.6933438Z (Reading database ... 20%
+2026-02-19T10:14:45.6933775Z (Reading database ... 25%
+2026-02-19T10:14:45.6934124Z (Reading database ... 30%
+2026-02-19T10:14:45.6934466Z (Reading database ... 35%
+2026-02-19T10:14:45.6934812Z (Reading database ... 40%
+2026-02-19T10:14:45.6935165Z (Reading database ... 45%
+2026-02-19T10:14:45.6935509Z (Reading database ... 50%
+2026-02-19T10:14:45.7043707Z (Reading database ... 55%
+2026-02-19T10:14:45.7653837Z (Reading database ... 60%
+2026-02-19T10:14:45.8153004Z (Reading database ... 65%
+2026-02-19T10:14:45.8583868Z (Reading database ... 70%
+2026-02-19T10:14:45.9028478Z (Reading database ... 75%
+2026-02-19T10:14:46.0249638Z (Reading database ... 80%
+2026-02-19T10:14:46.2310080Z (Reading database ... 85%
+2026-02-19T10:14:46.4669246Z (Reading database ... 90%
+2026-02-19T10:14:46.6355472Z (Reading database ... 95%
+2026-02-19T10:14:46.6357722Z (Reading database ... 100%
+2026-02-19T10:14:46.6358292Z (Reading database ... 218331 files and directories currently installed.)
+2026-02-19T10:14:46.6402920Z Preparing to unpack .../postgresql-client_16+257build1.1_all.deb ...
+2026-02-19T10:14:46.6424840Z Unpacking postgresql-client (16+257build1.1) ...
+2026-02-19T10:14:46.6762535Z Setting up postgresql-client (16+257build1.1) ...
+2026-02-19T10:14:47.2505058Z 
+2026-02-19T10:14:47.2506007Z Running kernel seems to be up-to-date.
+2026-02-19T10:14:47.2506528Z 
+2026-02-19T10:14:47.2507105Z No services need to be restarted.
+2026-02-19T10:14:47.2508828Z 
+2026-02-19T10:14:47.2509001Z No containers need to be restarted.
+2026-02-19T10:14:47.2509294Z 
+2026-02-19T10:14:47.2509479Z No user sessions are running outdated binaries.
+2026-02-19T10:14:47.2509820Z 
+2026-02-19T10:14:47.2510121Z No VM guests are running outdated hypervisor (qemu) binaries on this host.
+2026-02-19T10:14:48.4618208Z CREATE DATABASE
+2026-02-19T10:14:48.4671706Z ##[group]Run mvn package -pl cbs-account-service -am -DskipTests -q
+2026-02-19T10:14:48.4672257Z [36;1mmvn package -pl cbs-account-service -am -DskipTests -q[0m
+2026-02-19T10:14:48.4672680Z [36;1mjava -jar cbs-account-service/target/*.jar \[0m
+2026-02-19T10:14:48.4673096Z [36;1m  --server.port=8083 \[0m
+2026-02-19T10:14:48.4673565Z [36;1m  --spring.datasource.url=jdbc:postgresql://localhost:5432/cbs_account_it \[0m
+2026-02-19T10:14:48.4674052Z [36;1m  --spring.datasource.username=test \[0m
+2026-02-19T10:14:48.4674594Z [36;1m  --spring.datasource.*** \[0m
+2026-02-19T10:14:48.4674906Z [36;1m  --eureka.client.enabled=false \[0m
+2026-02-19T10:14:48.4675250Z [36;1m  --spring.cloud.config.enabled=false \[0m
+2026-02-19T10:14:48.4675718Z [36;1m  --spring.kafka.bootstrap-servers=localhost:9092 &[0m
+2026-02-19T10:14:48.4676859Z [36;1m[0m
+2026-02-19T10:14:48.4677105Z [36;1mecho "Waiting for service to start..."[0m
+2026-02-19T10:14:48.4677591Z [36;1mfor i in {1..60}; do[0m
+2026-02-19T10:14:48.4677963Z [36;1m  if curl -s http://localhost:8083/actuator/health | grep "UP"; then[0m
+2026-02-19T10:14:48.4678431Z [36;1m    echo "Service is UP!"[0m
+2026-02-19T10:14:48.4678725Z [36;1m    exit 0[0m
+2026-02-19T10:14:48.4678967Z [36;1m  fi[0m
+2026-02-19T10:14:48.4679214Z [36;1m  sleep 2[0m
+2026-02-19T10:14:48.4679452Z [36;1mdone[0m
+2026-02-19T10:14:48.4679722Z [36;1mecho "Service failed to start"[0m
+2026-02-19T10:14:48.4680019Z [36;1mexit 1[0m
+2026-02-19T10:14:48.4706821Z shell: /usr/bin/bash -e {0}
+2026-02-19T10:14:48.4707109Z env:
+2026-02-19T10:14:48.4707468Z   JAVA_HOME: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.18-8/x64
+2026-02-19T10:14:48.4708030Z   JAVA_HOME_17_X64: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.18-8/x64
+2026-02-19T10:14:48.4708541Z ##[endgroup]
+2026-02-19T10:15:06.3498141Z Waiting for service to start...
+2026-02-19T10:15:07.8295390Z 
+2026-02-19T10:15:07.8331668Z   .   ____          _            __ _ _
+2026-02-19T10:15:07.8332500Z  /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+2026-02-19T10:15:07.8333050Z ( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+2026-02-19T10:15:07.8333743Z  \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+2026-02-19T10:15:07.8334315Z   '  |____| .__|_| |_|_| |_\__, | / / / /
+2026-02-19T10:15:07.8334870Z  =========|_|==============|___/=/_/_/_/
+2026-02-19T10:15:07.8335188Z 
+2026-02-19T10:15:07.8335665Z  :: Spring Boot ::                (v3.3.2)
+2026-02-19T10:15:07.8336219Z 
+2026-02-19T10:15:08.0465143Z 2026-02-19T10:15:08.041Z  INFO 3037 --- [cbs-account-service] [           main] c.c.a.CbsAccountServiceApplication       : Starting CbsAccountServiceApplication using Java 17.0.18 with PID 3037 (/home/runner/work/banking-core-system/banking-core-system/cbs-account-service/target/cbs-account-service-0.1.0-SNAPSHOT.jar started by runner in /home/runner/work/banking-core-system/banking-core-system)
+2026-02-19T10:15:08.0495772Z 2026-02-19T10:15:08.049Z  INFO 3037 --- [cbs-account-service] [           main] c.c.a.CbsAccountServiceApplication       : No active profile set, falling back to 1 default profile: "default"
+2026-02-19T10:15:09.8719517Z 2026-02-19T10:15:09.871Z  INFO 3037 --- [cbs-account-service] [           main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-02-19T10:15:10.1105164Z 2026-02-19T10:15:10.110Z  INFO 3037 --- [cbs-account-service] [           main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 225 ms. Found 1 JPA repository interface.
+2026-02-19T10:15:10.4385486Z 2026-02-19T10:15:10.437Z  INFO 3037 --- [cbs-account-service] [           main] o.s.cloud.context.scope.GenericScope     : BeanFactory id=8d22926f-a5b2-31b4-89cb-8a9ab902e5de
+2026-02-19T10:15:10.6808083Z 2026-02-19T10:15:10.678Z  WARN 3037 --- [cbs-account-service] [           main] trationDelegate$BeanPostProcessorChecker : Bean 'org.springframework.cloud.client.loadbalancer.LoadBalancerAutoConfiguration$DeferringLoadBalancerInterceptorConfig' of type [org.springframework.cloud.client.loadbalancer.LoadBalancerAutoConfiguration$DeferringLoadBalancerInterceptorConfig] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying). The currently created BeanPostProcessor [lbRestClientPostProcessor] is declared through a non-static factory method on that class; consider declaring it as static instead.
+2026-02-19T10:15:10.6843701Z 2026-02-19T10:15:10.683Z  WARN 3037 --- [cbs-account-service] [           main] trationDelegate$BeanPostProcessorChecker : Bean 'deferringLoadBalancerInterceptor' of type [org.springframework.cloud.client.loadbalancer.DeferringLoadBalancerInterceptor] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying). Is this bean getting eagerly injected into a currently created BeanPostProcessor [lbRestClientPostProcessor]? Check the corresponding BeanPostProcessor declaration and its dependencies.
+2026-02-19T10:15:11.0201236Z 2026-02-19T10:15:11.019Z  INFO 3037 --- [cbs-account-service] [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 8083 (http)
+2026-02-19T10:15:11.0512672Z 2026-02-19T10:15:11.050Z  INFO 3037 --- [cbs-account-service] [           main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2026-02-19T10:15:11.0519811Z 2026-02-19T10:15:11.051Z  INFO 3037 --- [cbs-account-service] [           main] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.26]
+2026-02-19T10:15:11.0984979Z 2026-02-19T10:15:11.097Z  INFO 3037 --- [cbs-account-service] [           main] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+2026-02-19T10:15:11.1009141Z 2026-02-19T10:15:11.100Z  INFO 3037 --- [cbs-account-service] [           main] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 2929 ms
+2026-02-19T10:15:11.3367905Z 2026-02-19T10:15:11.333Z  INFO 3037 --- [cbs-account-service] [           main] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
+2026-02-19T10:15:11.4182188Z 2026-02-19T10:15:11.417Z  INFO 3037 --- [cbs-account-service] [           main] org.hibernate.Version                    : HHH000412: Hibernate ORM core version 6.5.2.Final
+2026-02-19T10:15:11.4589036Z 2026-02-19T10:15:11.458Z  INFO 3037 --- [cbs-account-service] [           main] o.h.c.internal.RegionFactoryInitiator    : HHH000026: Second-level cache disabled
+2026-02-19T10:15:12.1939077Z 2026-02-19T10:15:12.190Z  INFO 3037 --- [cbs-account-service] [           main] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-02-19T10:15:12.2280734Z 2026-02-19T10:15:12.227Z  INFO 3037 --- [cbs-account-service] [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2026-02-19T10:15:12.6100550Z 2026-02-19T10:15:12.608Z  INFO 3037 --- [cbs-account-service] [           main] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection org.postgresql.jdbc.PgConnection@6533629
+2026-02-19T10:15:12.6112880Z 2026-02-19T10:15:12.610Z  INFO 3037 --- [cbs-account-service] [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2026-02-19T10:15:13.8654395Z 2026-02-19T10:15:13.864Z  INFO 3037 --- [cbs-account-service] [           main] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-02-19T10:15:13.9182507Z 2026-02-19T10:15:13.917Z  WARN 3037 --- [cbs-account-service] [           main] o.h.engine.jdbc.spi.SqlExceptionHelper   : SQL Warning Code: 0, SQLState: 00000
+2026-02-19T10:15:13.9188664Z 2026-02-19T10:15:13.918Z  WARN 3037 --- [cbs-account-service] [           main] o.h.engine.jdbc.spi.SqlExceptionHelper   : constraint "uk_accounts_account_number" of relation "accounts" does not exist, skipping
+2026-02-19T10:15:13.9218384Z 2026-02-19T10:15:13.921Z  INFO 3037 --- [cbs-account-service] [           main] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-02-19T10:15:15.2167131Z 2026-02-19T10:15:15.216Z  INFO 3037 --- [cbs-account-service] [           main] DiscoveryClientOptionalArgsConfiguration : Eureka HTTP Client uses RestTemplate.
+2026-02-19T10:15:15.2752215Z 2026-02-19T10:15:15.274Z  WARN 3037 --- [cbs-account-service] [           main] iguration$LoadBalancerCaffeineWarnLogger : Spring Cloud LoadBalancer is currently working with the default cache. While this cache implementation is useful for development and tests, it's recommended to use Caffeine cache in production.You can switch to using Caffeine cache, by adding it and org.springframework.cache.caffeine.CaffeineCacheManager to the classpath.
+2026-02-19T10:15:15.3195845Z 2026-02-19T10:15:15.319Z  INFO 3037 --- [cbs-account-service] [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 8083 (http) with context path '/'
+2026-02-19T10:15:15.3432044Z 2026-02-19T10:15:15.342Z  INFO 3037 --- [cbs-account-service] [           main] c.c.a.CbsAccountServiceApplication       : Started CbsAccountServiceApplication in 8.156 seconds (process running for 8.992)
+2026-02-19T10:15:16.4991057Z 2026-02-19T10:15:16.498Z  INFO 3037 --- [cbs-account-service] [nio-8083-exec-1] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring DispatcherServlet 'dispatcherServlet'
+2026-02-19T10:15:16.4998691Z 2026-02-19T10:15:16.499Z  INFO 3037 --- [cbs-account-service] [nio-8083-exec-1] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
+2026-02-19T10:15:16.5021293Z 2026-02-19T10:15:16.501Z  INFO 3037 --- [cbs-account-service] [nio-8083-exec-1] o.s.web.servlet.DispatcherServlet        : Completed initialization in 1 ms
+2026-02-19T10:17:07.2187514Z Service failed to start
+2026-02-19T10:17:12.2200841Z ##[error]Process completed with exit code 1.
+2026-02-19T10:17:12.2380742Z Post job cleanup.
+2026-02-19T10:17:12.4007774Z Post job cleanup.
+2026-02-19T10:17:12.5155233Z [command]/usr/bin/git version
+2026-02-19T10:17:12.5191795Z git version 2.52.0
+2026-02-19T10:17:12.5232475Z Temporarily overriding HOME='/home/runner/work/_temp/277f441d-c7ab-49c8-b1e6-5b63c9f0f112' before making global git config changes
+2026-02-19T10:17:12.5234504Z Adding repository directory to the temporary git global config as a safe directory
+2026-02-19T10:17:12.5249969Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/banking-core-system/banking-core-system
+2026-02-19T10:17:12.5281688Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-02-19T10:17:12.5311411Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-02-19T10:17:12.5499595Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-02-19T10:17:12.5518071Z http.https://github.com/.extraheader
+2026-02-19T10:17:12.5530438Z [command]/usr/bin/git config --local --unset-all http.https://github.com/.extraheader
+2026-02-19T10:17:12.5557599Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-02-19T10:17:12.5741755Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-02-19T10:17:12.5769524Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-02-19T10:17:12.6012099Z Print service container logs: 00b4b9b69dac4e00921a357d7a17409a_postgres16_3ac692
+2026-02-19T10:17:12.6017265Z ##[command]/usr/bin/docker logs --details afa1eb376f9861470f9c6df4bba42bc42d94f1073b07f508ca1dba0ae3da7698
+2026-02-19T10:17:12.6147012Z  The files belonging to this database system will be owned by user "postgres".
+2026-02-19T10:17:12.6148349Z  This user must also own the server process.
+2026-02-19T10:17:12.6150769Z  initdb: warning: enabling "trust" authentication for local connections
+2026-02-19T10:17:12.6153929Z  initdb: hint: You can change this by editing pg_hba.conf or using the option -A, or --auth-local and --auth-host, the next time you run initdb.
+2026-02-19T10:17:12.6155639Z  2026-02-19 10:14:21.035 UTC [1] LOG:  starting PostgreSQL 16.12 (Debian 16.12-1.pgdg13+1) on x86_64-pc-linux-gnu, compiled by gcc (Debian 14.2.0-19) 14.2.0, 64-bit
+2026-02-19T10:17:12.6157063Z  2026-02-19 10:14:21.035 UTC [1] LOG:  listening on IPv4 address "0.0.0.0", port 5432
+2026-02-19T10:17:12.6163517Z  2026-02-19 10:14:21.035 UTC [1] LOG:  listening on IPv6 address "::", port 5432
+2026-02-19T10:17:12.6166500Z  2026-02-19 10:14:21.037 UTC [1] LOG:  listening on Unix socket "/var/run/postgresql/.s.PGSQL.5432"
+2026-02-19T10:17:12.6167370Z  2026-02-19 10:14:21.039 UTC [62] LOG:  database system was shut down at 2026-02-19 10:14:20 UTC
+2026-02-19T10:17:12.6168124Z  2026-02-19 10:14:21.042 UTC [1] LOG:  database system is ready to accept connections
+2026-02-19T10:17:12.6168831Z  2026-02-19 10:14:30.246 UTC [73] FATAL:  role "root" does not exist
+2026-02-19T10:17:12.6169137Z  
+2026-02-19T10:17:12.6169757Z  The database cluster will be initialized with locale "en_US.utf8".
+2026-02-19T10:17:12.6170371Z  The default database encoding has accordingly been set to "UTF8".
+2026-02-19T10:17:12.6170983Z  The default text search configuration will be set to "english".
+2026-02-19T10:17:12.6171417Z  
+2026-02-19T10:17:12.6171687Z  Data page checksums are disabled.
+2026-02-19T10:17:12.6172083Z  
+2026-02-19T10:17:12.6172590Z  fixing permissions on existing directory /var/lib/postgresql/data ... ok
+2026-02-19T10:17:12.6173507Z  creating subdirectories ... ok
+2026-02-19T10:17:12.6173974Z  selecting dynamic shared memory implementation ... posix
+2026-02-19T10:17:12.6174540Z  selecting default max_connections ... 100
+2026-02-19T10:17:12.6175040Z  selecting default shared_buffers ... 128MB
+2026-02-19T10:17:12.6175537Z  selecting default time zone ... Etc/UTC
+2026-02-19T10:17:12.6176156Z  creating configuration files ... ok
+2026-02-19T10:17:12.6176611Z  running bootstrap script ... ok
+2026-02-19T10:17:12.6177102Z  performing post-bootstrap initialization ... ok
+2026-02-19T10:17:12.6177626Z  syncing data to disk ... ok
+2026-02-19T10:17:12.6177999Z  
+2026-02-19T10:17:12.6178256Z  
+2026-02-19T10:17:12.6178628Z  Success. You can now start the database server using:
+2026-02-19T10:17:12.6179136Z  
+2026-02-19T10:17:12.6179502Z      pg_ctl -D /var/lib/postgresql/data -l logfile start
+2026-02-19T10:17:12.6180001Z  
+2026-02-19T10:17:12.6180994Z  waiting for server to start....2026-02-19 10:14:20.803 UTC [48] LOG:  starting PostgreSQL 16.12 (Debian 16.12-1.pgdg13+1) on x86_64-pc-linux-gnu, compiled by gcc (Debian 14.2.0-19) 14.2.0, 64-bit
+2026-02-19T10:17:12.6182451Z  2026-02-19 10:14:20.803 UTC [48] LOG:  listening on Unix socket "/var/run/postgresql/.s.PGSQL.5432"
+2026-02-19T10:17:12.6183420Z  2026-02-19 10:14:20.806 UTC [51] LOG:  database system was shut down at 2026-02-19 10:14:20 UTC
+2026-02-19T10:17:12.6184259Z  2026-02-19 10:14:20.809 UTC [48] LOG:  database system is ready to accept connections
+2026-02-19T10:17:12.6184723Z   done
+2026-02-19T10:17:12.6184933Z  server started
+2026-02-19T10:17:12.6185153Z  
+2026-02-19T10:17:12.6185525Z  /usr/local/bin/docker-entrypoint.sh: ignoring /docker-entrypoint-initdb.d/*
+2026-02-19T10:17:12.6186288Z  
+2026-02-19T10:17:12.6186677Z  2026-02-19 10:14:20.919 UTC [48] LOG:  received fast shutdown request
+2026-02-19T10:17:12.6187779Z  waiting for server to shut down....2026-02-19 10:14:20.920 UTC [48] LOG:  aborting any active transactions
+2026-02-19T10:17:12.6188963Z  2026-02-19 10:14:20.922 UTC [48] LOG:  background worker "logical replication launcher" (PID 54) exited with exit code 1
+2026-02-19T10:17:12.6189912Z  2026-02-19 10:14:20.923 UTC [49] LOG:  shutting down
+2026-02-19T10:17:12.6190574Z  2026-02-19 10:14:20.924 UTC [49] LOG:  checkpoint starting: shutdown immediate
+2026-02-19T10:17:12.6192502Z  2026-02-19 10:14:20.927 UTC [49] LOG:  checkpoint complete: wrote 3 buffers (0.0%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.002 s, sync=0.001 s, total=0.005 s; sync files=2, longest=0.001 s, average=0.001 s; distance=0 kB, estimate=0 kB; lsn=0/14F2AE0, redo lsn=0/14F2AE0
+2026-02-19T10:17:12.6194405Z  2026-02-19 10:14:20.930 UTC [48] LOG:  database system is shut down
+2026-02-19T10:17:12.6194905Z   done
+2026-02-19T10:17:12.6195147Z  server stopped
+2026-02-19T10:17:12.6195402Z  
+2026-02-19T10:17:12.6195779Z  PostgreSQL init process complete; ready for start up.
+2026-02-19T10:17:12.6196492Z  
+2026-02-19T10:17:12.6196938Z  2026-02-19 10:14:40.325 UTC [81] FATAL:  role "root" does not exist
+2026-02-19T10:17:12.6197656Z  2026-02-19 10:14:50.414 UTC [90] FATAL:  role "root" does not exist
+2026-02-19T10:17:12.6198367Z  2026-02-19 10:15:00.541 UTC [98] FATAL:  role "root" does not exist
+2026-02-19T10:17:12.6199066Z  2026-02-19 10:15:10.641 UTC [106] FATAL:  role "root" does not exist
+2026-02-19T10:17:12.6199672Z  2026-02-19 10:15:20.695 UTC [125] FATAL:  role "root" does not exist
+2026-02-19T10:17:12.6200227Z  2026-02-19 10:15:30.765 UTC [134] FATAL:  role "root" does not exist
+2026-02-19T10:17:12.6200715Z  2026-02-19 10:15:40.823 UTC [142] FATAL:  role "root" does not exist
+2026-02-19T10:17:12.6201255Z  2026-02-19 10:15:50.879 UTC [150] FATAL:  role "root" does not exist
+2026-02-19T10:17:12.6201846Z  2026-02-19 10:16:00.936 UTC [160] FATAL:  role "root" does not exist
+2026-02-19T10:17:12.6202339Z  2026-02-19 10:16:10.992 UTC [168] FATAL:  role "root" does not exist
+2026-02-19T10:17:12.6202858Z  2026-02-19 10:16:21.052 UTC [178] FATAL:  role "root" does not exist
+2026-02-19T10:17:12.6203472Z  2026-02-19 10:16:31.129 UTC [187] FATAL:  role "root" does not exist
+2026-02-19T10:17:12.6204235Z  2026-02-19 10:16:41.186 UTC [196] FATAL:  role "root" does not exist
+2026-02-19T10:17:12.6204589Z  2026-02-19 10:16:51.241 UTC [205] FATAL:  role "root" does not exist
+2026-02-19T10:17:12.6204927Z  2026-02-19 10:17:01.299 UTC [214] FATAL:  role "root" does not exist
+2026-02-19T10:17:12.6205283Z  2026-02-19 10:17:11.354 UTC [224] FATAL:  role "root" does not exist
+2026-02-19T10:17:12.6210736Z Stop and remove container: 00b4b9b69dac4e00921a357d7a17409a_postgres16_3ac692
+2026-02-19T10:17:12.6216302Z ##[command]/usr/bin/docker rm --force afa1eb376f9861470f9c6df4bba42bc42d94f1073b07f508ca1dba0ae3da7698
+2026-02-19T10:17:12.7306468Z afa1eb376f9861470f9c6df4bba42bc42d94f1073b07f508ca1dba0ae3da7698
+2026-02-19T10:17:12.7329632Z Remove container network: github_network_4f5c264c429b4927bf4c42fd3d6ae55b
+2026-02-19T10:17:12.7333666Z ##[command]/usr/bin/docker network rm github_network_4f5c264c429b4927bf4c42fd3d6ae55b
+2026-02-19T10:17:12.7912425Z github_network_4f5c264c429b4927bf4c42fd3d6ae55b
+2026-02-19T10:17:12.7967667Z Cleaning up orphan processes
+2026-02-19T10:17:12.8230330Z Terminate orphan process: pid (3037) (java)

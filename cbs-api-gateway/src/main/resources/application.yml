@@ -126,9 +126,9 @@ spring:
         - id: interest-service-docs
           uri: lb://cbs-interest-service
           predicates:
-            - Path=/api/v1/interest/v3/api-docs
+            - Path=/api/v1/interests/v3/api-docs
           filters:
-            - RewritePath=/api/v1/interest/v3/api-docs, /v3/api-docs
+            - RewritePath=/api/v1/interests/v3/api-docs, /v3/api-docs
         - id: fee-service-docs
           uri: lb://cbs-fee-service
           predicates:
@@ -176,7 +176,7 @@ springdoc:
       - name: Notification Service
         url: /api/v1/notifications/v3/api-docs
       - name: Interest Service
-        url: /api/v1/interest/v3/api-docs
+        url: /api/v1/interests/v3/api-docs
       - name: Fee Service
         url: /api/v1/fees/v3/api-docs
       - name: Fx Service
