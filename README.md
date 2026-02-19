@@ -33,13 +33,48 @@ PostgreSQL mounts initialization scripts from `db/init` and auto-creates service
 
 Scripts under `/docker-entrypoint-initdb.d` run only when Postgres initializes a fresh data directory.
 
-## Local Startup Order
+## Quick Start (Makefile)
+The easiest way to build and run the entire system:
+
+```bash
+# Build and start everything
+make restart
+
+# Just start existing build
+make up
+
+# Check status
+make ps
+
+# Follow logs
+make logs
+
+# Shut down
+make down
+```
+
+## Docker (Full Stack)
+The entire system can be started with a single command:
+
+```bash
+docker compose up -d
+```
+
+This starts:
+- Infrastructure: PostgreSQL 16, Zookeeper, Kafka
+- Discovery Server (Eureka): [http://localhost:8761](http://localhost:8761)
+- Config Server: [http://localhost:8888](http://localhost:8888)
+- API Gateway: [http://localhost:8080](http://localhost:8080)
+- All 15 microservices (Auth, Customer, Account, Transaction, etc.)
+
+## Local Development Startup Order
+If running services manually:
 1. Infrastructure: `docker compose up -d postgres zookeeper kafka`
 2. Discovery server: `cbs-discovery-server` (port `8761`)
 3. Config server: `cbs-config-server` (port `8888`)
 4. Core services: auth, customer, account, ledger
 5. Domain services: transaction, payment, loan, deposit, card, notification, interest, fee, fx, reporting
-6. API gateway last: `cbs-api-gateway` (port `8080`)
+6. API Gateway: `cbs-api-gateway` (port `8080`)
 
 Example run command from repository root:
 - `mvn -pl <module-name> -am spring-boot:run`
