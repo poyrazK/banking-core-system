@@ -12,6 +12,10 @@
     <artifactId>cbs-common</artifactId>
     <name>CBS Common</name>
 
+    <properties>
+        <spring-boot.repackage.skip>true</spring-boot.repackage.skip>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>jakarta.persistence</groupId>

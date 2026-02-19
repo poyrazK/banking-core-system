@@ -11,6 +11,11 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./db/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U cbs -d cbs_config" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
   zookeeper:
     image: confluentinc/cp-zookeeper:7.6.1
@@ -31,8 +36,290 @@ services:
     environment:
       KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,PLAINTEXT_HOST://localhost:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+
+  cbs-discovery-server:
+    build:
+      context: .
+      args:
+        MODULE: cbs-discovery-server
+    container_name: cbs-discovery-server
+    ports:
+      - "8761:8761"
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8761/actuator/health" ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  cbs-config-server:
+    build:
+      context: .
+      args:
+        MODULE: cbs-config-server
+    container_name: cbs-config-server
+    ports:
+      - "8888:8888"
+    environment:
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://cbs-discovery-server:8761/eureka
+    depends_on:
+      cbs-discovery-server:
+        condition: service_healthy
+
+  cbs-auth-service:
+    build:
+      context: .
+      args:
+        MODULE: cbs-auth-service
+    container_name: cbs-auth-service
+    ports:
+      - "8081:8081"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/cbs_auth
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://cbs-discovery-server:8761/eureka
+    depends_on:
+      postgres:
+        condition: service_healthy
+      cbs-discovery-server:
+        condition: service_healthy
+
+  cbs-customer-service:
+    build:
+      context: .
+      args:
+        MODULE: cbs-customer-service
+    container_name: cbs-customer-service
+    ports:
+      - "8082:8082"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/cbs_customer
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://cbs-discovery-server:8761/eureka
+    depends_on:
+      postgres:
+        condition: service_healthy
+      cbs-discovery-server:
+        condition: service_healthy
+
+  cbs-account-service:
+    build:
+      context: .
+      args:
+        MODULE: cbs-account-service
+    container_name: cbs-account-service
+    ports:
+      - "8083:8083"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/cbs_account
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://cbs-discovery-server:8761/eureka
+    depends_on:
+      postgres:
+        condition: service_healthy
+      cbs-discovery-server:
+        condition: service_healthy
+
+  cbs-transaction-service:
+    build:
+      context: .
+      args:
+        MODULE: cbs-transaction-service
+    container_name: cbs-transaction-service
+    ports:
+      - "8084:8084"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/cbs_transaction
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://cbs-discovery-server:8761/eureka
+    depends_on:
+      postgres:
+        condition: service_healthy
+      cbs-discovery-server:
+        condition: service_healthy
+
+  cbs-loan-service:
+    build:
+      context: .
+      args:
+        MODULE: cbs-loan-service
+    container_name: cbs-loan-service
+    ports:
+      - "8085:8085"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/cbs_loan
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://cbs-discovery-server:8761/eureka
+    depends_on:
+      postgres:
+        condition: service_healthy
+      cbs-discovery-server:
+        condition: service_healthy
+
+  cbs-deposit-service:
+    build:
+      context: .
+      args:
+        MODULE: cbs-deposit-service
+    container_name: cbs-deposit-service
+    ports:
+      - "8086:8086"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/cbs_deposit
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://cbs-discovery-server:8761/eureka
+    depends_on:
+      postgres:
+        condition: service_healthy
+      cbs-discovery-server:
+        condition: service_healthy
+
+  cbs-interest-service:
+    build:
+      context: .
+      args:
+        MODULE: cbs-interest-service
+    container_name: cbs-interest-service
+    ports:
+      - "8087:8087"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/cbs_interest
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://cbs-discovery-server:8761/eureka
+    depends_on:
+      postgres:
+        condition: service_healthy
+      cbs-discovery-server:
+        condition: service_healthy
+
+  cbs-ledger-service:
+    build:
+      context: .
+      args:
+        MODULE: cbs-ledger-service
+    container_name: cbs-ledger-service
+    ports:
+      - "8088:8088"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/cbs_ledger
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://cbs-discovery-server:8761/eureka
+    depends_on:
+      postgres:
+        condition: service_healthy
+      cbs-discovery-server:
+        condition: service_healthy
+
+  cbs-payment-service:
+    build:
+      context: .
+      args:
+        MODULE: cbs-payment-service
+    container_name: cbs-payment-service
+    ports:
+      - "8089:8089"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/cbs_payment
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://cbs-discovery-server:8761/eureka
+    depends_on:
+      postgres:
+        condition: service_healthy
+      cbs-discovery-server:
+        condition: service_healthy
+
+  cbs-card-service:
+    build:
+      context: .
+      args:
+        MODULE: cbs-card-service
+    container_name: cbs-card-service
+    ports:
+      - "8090:8090"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/cbs_card
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://cbs-discovery-server:8761/eureka
+    depends_on:
+      postgres:
+        condition: service_healthy
+      cbs-discovery-server:
+        condition: service_healthy
+
+  cbs-notification-service:
+    build:
+      context: .
+      args:
+        MODULE: cbs-notification-service
+    container_name: cbs-notification-service
+    ports:
+      - "8091:8091"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/cbs_notification
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://cbs-discovery-server:8761/eureka
+    depends_on:
+      postgres:
+        condition: service_healthy
+      cbs-discovery-server:
+        condition: service_healthy
+
+  cbs-fee-service:
+    build:
+      context: .
+      args:
+        MODULE: cbs-fee-service
+    container_name: cbs-fee-service
+    ports:
+      - "8092:8092"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/cbs_fee
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://cbs-discovery-server:8761/eureka
+    depends_on:
+      postgres:
+        condition: service_healthy
+      cbs-discovery-server:
+        condition: service_healthy
+
+  cbs-fx-service:
+    build:
+      context: .
+      args:
+        MODULE: cbs-fx-service
+    container_name: cbs-fx-service
+    ports:
+      - "8093:8093"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/cbs_fx
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://cbs-discovery-server:8761/eureka
+    depends_on:
+      postgres:
+        condition: service_healthy
+      cbs-discovery-server:
+        condition: service_healthy
+
+  cbs-reporting-service:
+    build:
+      context: .
+      args:
+        MODULE: cbs-reporting-service
+    container_name: cbs-reporting-service
+    ports:
+      - "8094:8094"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/cbs_reporting
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://cbs-discovery-server:8761/eureka
+    depends_on:
+      postgres:
+        condition: service_healthy
+      cbs-discovery-server:
+        condition: service_healthy
+
+  cbs-api-gateway:
+    build:
+      context: .
+      args:
+        MODULE: cbs-api-gateway
+    container_name: cbs-api-gateway
+    ports:
+      - "8080:8080"
+    environment:
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://cbs-discovery-server:8761/eureka
+    depends_on:
+      cbs-discovery-server:
+        condition: service_healthy
 
 volumes:
   postgres_data:
