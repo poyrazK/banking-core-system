@@ -90,6 +90,44 @@ class AccountServiceTest {
     }
 
     @Test
+    void creditBalance_throwsWhenCurrencyMismatch() {
+        Account account = new Account(1L, "TR001", AccountType.CHECKING, Currency.TRY, BigDecimal.valueOf(100));
+        when(accountRepository.findById(10L)).thenReturn(Optional.of(account));
+
+        BalanceUpdateRequest request = new BalanceUpdateRequest(BigDecimal.valueOf(20), Currency.USD);
+        ApiException exception = assertThrows(
+                ApiException.class,
+                () -> accountService.creditBalance(10L, request));
+
+        assertEquals("CURRENCY_MISMATCH", exception.getErrorCode());
+        assertEquals("Expected TRY but received USD", exception.getMessage());
+    }
+
+    @Test
+    void debitBalance_succeedsWhenCurrencyIsNullForBackwardCompatibility() {
+        Account account = new Account(1L, "TR001", AccountType.CHECKING, Currency.TRY, BigDecimal.valueOf(100));
+        when(accountRepository.findById(11L)).thenReturn(Optional.of(account));
+        when(accountRepository.save(any(Account.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        BalanceUpdateRequest request = new BalanceUpdateRequest(BigDecimal.valueOf(20), null);
+        AccountResponse response = accountService.debitBalance(11L, request);
+
+        assertEquals(0, new BigDecimal("80.00").compareTo(response.balance()));
+    }
+
+    @Test
+    void getAccountCurrency_returnsCorrectCurrency() {
+        Account account = new Account(1L, "TR001", AccountType.SAVINGS, Currency.EUR, BigDecimal.ZERO);
+        account.setId(50L);
+        when(accountRepository.findById(50L)).thenReturn(Optional.of(account));
+
+        var response = accountService.getAccountCurrency(50L);
+
+        assertEquals(50L, response.accountId());
+        assertEquals(Currency.EUR, response.currency());
+    }
+
+    @Test
     void updateStatus_throwsWhenReactivatingClosedAccount() {
         Account account = new Account(1L, "TR001", AccountType.CURRENT, Currency.TRY, BigDecimal.ZERO);
         account.setStatus(AccountStatus.CLOSED);

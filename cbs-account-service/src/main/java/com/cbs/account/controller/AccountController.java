@@ -3,6 +3,7 @@ package com.cbs.account.controller;
 import com.cbs.account.dto.AccountResponse;
 import com.cbs.account.dto.BalanceUpdateRequest;
 import com.cbs.account.dto.CreateAccountRequest;
+import com.cbs.account.dto.CurrencyResponse;
 import com.cbs.account.dto.UpdateAccountStatusRequest;
 import com.cbs.account.service.AccountService;
 import com.cbs.common.api.ApiResponse;
@@ -73,5 +74,12 @@ public class AccountController {
             @Valid @RequestBody UpdateAccountStatusRequest request) {
         AccountResponse accountResponse = accountService.updateStatus(accountId, request);
         return ResponseEntity.ok(ApiResponse.success("Account status updated", accountResponse));
+    }
+
+    @GetMapping("/{accountId}/currency")
+    public ResponseEntity<ApiResponse<CurrencyResponse>> getAccountCurrency(
+            @PathVariable("accountId") Long accountId) {
+        CurrencyResponse response = accountService.getAccountCurrency(accountId);
+        return ResponseEntity.ok(ApiResponse.success("Currency retrieved", response));
     }
 }

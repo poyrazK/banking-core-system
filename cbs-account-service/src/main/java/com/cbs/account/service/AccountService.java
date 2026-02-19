@@ -3,6 +3,7 @@ package com.cbs.account.service;
 import com.cbs.account.dto.AccountResponse;
 import com.cbs.account.dto.BalanceUpdateRequest;
 import com.cbs.account.dto.CreateAccountRequest;
+import com.cbs.account.dto.CurrencyResponse;
 import com.cbs.account.dto.UpdateAccountStatusRequest;
 import com.cbs.account.model.Account;
 import com.cbs.account.model.AccountStatus;
@@ -53,6 +54,7 @@ public class AccountService {
     public AccountResponse creditBalance(Long accountId, BalanceUpdateRequest request) {
         Account account = findAccount(accountId);
         ensureBalanceUpdateAllowed(account);
+        ensureCurrencyMatches(account, request.currency());
 
         account.setBalance(account.getBalance().add(request.amount()));
         return AccountResponse.from(accountRepository.save(account));
@@ -62,6 +64,7 @@ public class AccountService {
     public AccountResponse debitBalance(Long accountId, BalanceUpdateRequest request) {
         Account account = findAccount(accountId);
         ensureBalanceUpdateAllowed(account);
+        ensureCurrencyMatches(account, request.currency());
 
         BigDecimal amount = request.amount();
         if (account.getBalance().compareTo(amount) < 0) {
@@ -83,6 +86,12 @@ public class AccountService {
         return AccountResponse.from(accountRepository.save(account));
     }
 
+    @Transactional(readOnly = true)
+    public CurrencyResponse getAccountCurrency(Long accountId) {
+        Account account = findAccount(accountId);
+        return new CurrencyResponse(account.getId(), account.getCurrencyCode());
+    }
+
     private Account findAccount(Long accountId) {
         return accountRepository.findById(accountId)
                 .orElseThrow(() -> new ApiException("ACCOUNT_NOT_FOUND", "Account not found"));
@@ -91,6 +100,13 @@ public class AccountService {
     private void ensureBalanceUpdateAllowed(Account account) {
         if (account.getStatus() != AccountStatus.ACTIVE) {
             throw new ApiException("ACCOUNT_NOT_ACTIVE", "Balance updates are allowed only for active accounts");
+        }
+    }
+
+    private void ensureCurrencyMatches(Account account, com.cbs.account.model.Currency requestCurrency) {
+        if (requestCurrency != null && requestCurrency != account.getCurrencyCode()) {
+            throw new ApiException("CURRENCY_MISMATCH",
+                    "Expected " + account.getCurrencyCode() + " but received " + requestCurrency);
         }
     }
 
