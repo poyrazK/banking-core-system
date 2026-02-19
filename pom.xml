@@ -16,22 +16,6 @@
     <description>Core Banking System Multi-Module Project</description>
 
     <modules>
-        <module>cbs-modules/cbs-common</module>
-
-        <module>cbs-modules/cbs-auth-service</module>
-        <module>cbs-modules/cbs-customer-service</module>
-        <module>cbs-modules/cbs-account-service</module>
-        <module>cbs-modules/cbs-transaction-service</module>
-        <module>cbs-modules/cbs-ledger-service</module>
-        <module>cbs-modules/cbs-loan-service</module>
-        <module>cbs-modules/cbs-deposit-service</module>
-        <module>cbs-modules/cbs-interest-service</module>
-        <module>cbs-modules/cbs-fee-service</module>
-        <module>cbs-modules/cbs-payment-service</module>
-        <module>cbs-modules/cbs-card-service</module>
-        <module>cbs-modules/cbs-fx-service</module>
-        <module>cbs-modules/cbs-notification-service</module>
-        <module>cbs-modules/cbs-reporting-service</module>
         <module>cbs-application</module>
     </modules>
 

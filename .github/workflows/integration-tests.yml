@@ -6,41 +6,40 @@ on:
 
 jobs:
   integration-tests:
-    name: ${{ matrix.module }} (IT)
+    name: IT - ${{ matrix.domain }}
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
         include:
-          - module: "cbs-auth-service"
+          - domain: "auth"
             db: "cbs_auth_it"
-          - module: "cbs-customer-service"
+          - domain: "customer"
             db: "cbs_customer_it"
-          - module: "cbs-account-service"
+          - domain: "account"
             db: "cbs_account_it"
-          - module: "cbs-transaction-service"
+          - domain: "transaction"
             db: "cbs_transaction_it"
-          - module: "cbs-ledger-service"
+          - domain: "ledger"
             db: "cbs_ledger_it"
-          - module: "cbs-loan-service"
+          - domain: "loan"
             db: "cbs_loan_it"
-          - module: "cbs-deposit-service"
+          - domain: "deposit"
             db: "cbs_deposit_it"
-          - module: "cbs-interest-service"
+          - domain: "interest"
             db: "cbs_interest_it"
-          - module: "cbs-fee-service"
+          - domain: "fee"
             db: "cbs_fee_it"
-          - module: "cbs-payment-service"
+          - domain: "payment"
             db: "cbs_payment_it"
-          - module: "cbs-card-service"
+          - domain: "card"
             db: "cbs_card_it"
-          - module: "cbs-fx-service"
+          - domain: "fx"
             db: "cbs_fx_it"
-          - module: "cbs-notification-service"
+          - domain: "notification"
             db: "cbs_notification_it"
-          - module: "cbs-reporting-service"
+          - domain: "reporting"
             db: "cbs_reporting_it"
-
 
     services:
       postgres:
@@ -75,14 +74,11 @@ jobs:
 
       - name: Run Integration Tests
         run: |
-          # Build parent and common first as they are needed by all modules
-          mvn install -DskipTests -am -pl :${{ matrix.module }}
-          
-          # Run the specific integration tests for the module
-          mvn test -pl :${{ matrix.module }} \
+          # Run the specific integration tests for the domain package
+          mvn test -pl :cbs-application \
             -DskipTests=false \
             -Dsurefire.failIfNoSpecifiedTests=false \
             -Dit.db.url="jdbc:postgresql://localhost:5432/${{ matrix.db }}" \
             -Dit.db.username="test" \
             -Dit.db.password="test" \
-            -Dtest="*IntegrationTest"
+            -Dtest="com.cbs.${{ matrix.domain }}.**.*IntegrationTest"
