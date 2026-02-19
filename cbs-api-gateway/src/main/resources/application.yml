@@ -63,10 +63,126 @@ spring:
           uri: lb://cbs-reporting-service
           predicates:
             - Path=/api/v1/reports/**
+        - id: auth-service-docs
+          uri: lb://cbs-auth-service
+          predicates:
+            - Path=/api/v1/auth/v3/api-docs
+          filters:
+            - RewritePath=/api/v1/auth/v3/api-docs, /v3/api-docs
+        - id: customer-service-docs
+          uri: lb://cbs-customer-service
+          predicates:
+            - Path=/api/v1/customers/v3/api-docs
+          filters:
+            - RewritePath=/api/v1/customers/v3/api-docs, /v3/api-docs
+        - id: account-service-docs
+          uri: lb://cbs-account-service
+          predicates:
+            - Path=/api/v1/accounts/v3/api-docs
+          filters:
+            - RewritePath=/api/v1/accounts/v3/api-docs, /v3/api-docs
+        - id: ledger-service-docs
+          uri: lb://cbs-ledger-service
+          predicates:
+            - Path=/api/v1/ledger/v3/api-docs
+          filters:
+            - RewritePath=/api/v1/ledger/v3/api-docs, /v3/api-docs
+        - id: transaction-service-docs
+          uri: lb://cbs-transaction-service
+          predicates:
+            - Path=/api/v1/transactions/v3/api-docs
+          filters:
+            - RewritePath=/api/v1/transactions/v3/api-docs, /v3/api-docs
+        - id: payment-service-docs
+          uri: lb://cbs-payment-service
+          predicates:
+            - Path=/api/v1/payments/v3/api-docs
+          filters:
+            - RewritePath=/api/v1/payments/v3/api-docs, /v3/api-docs
+        - id: loan-service-docs
+          uri: lb://cbs-loan-service
+          predicates:
+            - Path=/api/v1/loans/v3/api-docs
+          filters:
+            - RewritePath=/api/v1/loans/v3/api-docs, /v3/api-docs
+        - id: deposit-service-docs
+          uri: lb://cbs-deposit-service
+          predicates:
+            - Path=/api/v1/deposits/v3/api-docs
+          filters:
+            - RewritePath=/api/v1/deposits/v3/api-docs, /v3/api-docs
+        - id: card-service-docs
+          uri: lb://cbs-card-service
+          predicates:
+            - Path=/api/v1/cards/v3/api-docs
+          filters:
+            - RewritePath=/api/v1/cards/v3/api-docs, /v3/api-docs
+        - id: notification-service-docs
+          uri: lb://cbs-notification-service
+          predicates:
+            - Path=/api/v1/notifications/v3/api-docs
+          filters:
+            - RewritePath=/api/v1/notifications/v3/api-docs, /v3/api-docs
+        - id: interest-service-docs
+          uri: lb://cbs-interest-service
+          predicates:
+            - Path=/api/v1/interest/v3/api-docs
+          filters:
+            - RewritePath=/api/v1/interest/v3/api-docs, /v3/api-docs
+        - id: fee-service-docs
+          uri: lb://cbs-fee-service
+          predicates:
+            - Path=/api/v1/fees/v3/api-docs
+          filters:
+            - RewritePath=/api/v1/fees/v3/api-docs, /v3/api-docs
+        - id: fx-service-docs
+          uri: lb://cbs-fx-service
+          predicates:
+            - Path=/api/v1/fx/v3/api-docs
+          filters:
+            - RewritePath=/api/v1/fx/v3/api-docs, /v3/api-docs
+        - id: reporting-service-docs
+          uri: lb://cbs-reporting-service
+          predicates:
+            - Path=/api/v1/reports/v3/api-docs
+          filters:
+            - RewritePath=/api/v1/reports/v3/api-docs, /v3/api-docs
       discovery:
         locator:
           enabled: true
           lower-case-service-id: true
+
+springdoc:
+  swagger-ui:
+    urls:
+      - name: Auth Service
+        url: /api/v1/auth/v3/api-docs
+      - name: Customer Service
+        url: /api/v1/customers/v3/api-docs
+      - name: Account Service
+        url: /api/v1/accounts/v3/api-docs
+      - name: Ledger Service
+        url: /api/v1/ledger/v3/api-docs
+      - name: Transaction Service
+        url: /api/v1/transactions/v3/api-docs
+      - name: Payment Service
+        url: /api/v1/payments/v3/api-docs
+      - name: Loan Service
+        url: /api/v1/loans/v3/api-docs
+      - name: Deposit Service
+        url: /api/v1/deposits/v3/api-docs
+      - name: Card Service
+        url: /api/v1/cards/v3/api-docs
+      - name: Notification Service
+        url: /api/v1/notifications/v3/api-docs
+      - name: Interest Service
+        url: /api/v1/interest/v3/api-docs
+      - name: Fee Service
+        url: /api/v1/fees/v3/api-docs
+      - name: Fx Service
+        url: /api/v1/fx/v3/api-docs
+      - name: Reporting Service
+        url: /api/v1/reports/v3/api-docs
 
 eureka:
   client:
