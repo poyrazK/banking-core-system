@@ -14,10 +14,7 @@ import jakarta.persistence.UniqueConstraint;
 import java.math.BigDecimal;
 
 @Entity
-@Table(
-        name = "accounts",
-        uniqueConstraints = @UniqueConstraint(name = "uk_accounts_account_number", columnNames = "account_number")
-)
+@Table(name = "accounts", uniqueConstraints = @UniqueConstraint(name = "uk_accounts_account_number", columnNames = "account_number"))
 public class Account extends AuditableEntity {
 
     @Id
@@ -38,16 +35,21 @@ public class Account extends AuditableEntity {
     @Column(nullable = false, length = 16)
     private AccountStatus status = AccountStatus.ACTIVE;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "currency_code", nullable = false, length = 3)
+    private Currency currencyCode = Currency.TRY;
+
     @Column(nullable = false, precision = 19, scale = 2)
     private BigDecimal balance = BigDecimal.ZERO;
 
     public Account() {
     }
 
-    public Account(Long customerId, String accountNumber, AccountType type, BigDecimal balance) {
+    public Account(Long customerId, String accountNumber, AccountType type, Currency currencyCode, BigDecimal balance) {
         this.customerId = customerId;
         this.accountNumber = accountNumber;
         this.type = type;
+        this.currencyCode = currencyCode == null ? Currency.TRY : currencyCode;
         this.balance = balance == null ? BigDecimal.ZERO : balance;
     }
 
@@ -69,6 +71,10 @@ public class Account extends AuditableEntity {
 
     public AccountStatus getStatus() {
         return status;
+    }
+
+    public Currency getCurrencyCode() {
+        return currencyCode;
     }
 
     public BigDecimal getBalance() {

@@ -31,7 +31,8 @@ public class AccountService {
         }
 
         BigDecimal initialBalance = request.initialBalance() == null ? BigDecimal.ZERO : request.initialBalance();
-        Account account = new Account(request.customerId(), accountNumber, request.accountType(), initialBalance);
+        Account account = new Account(request.customerId(), accountNumber, request.accountType(), request.currency(),
+                initialBalance);
         return AccountResponse.from(accountRepository.save(account));
     }
 

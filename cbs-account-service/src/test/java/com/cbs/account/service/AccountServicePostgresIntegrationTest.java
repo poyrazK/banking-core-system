@@ -5,6 +5,7 @@ import com.cbs.account.dto.BalanceUpdateRequest;
 import com.cbs.account.dto.CreateAccountRequest;
 import com.cbs.account.model.Account;
 import com.cbs.account.model.AccountType;
+import com.cbs.account.model.Currency;
 import com.cbs.account.repository.AccountRepository;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -26,12 +27,11 @@ class AccountServicePostgresIntegrationTest {
 
     @DynamicPropertySource
     static void registerDataSource(DynamicPropertyRegistry registry) {
-    registry.add("spring.datasource.url", () -> System.getProperty(
-        "it.db.url",
-        "jdbc:postgresql://localhost:55432/cbs_account_it"
-    ));
-    registry.add("spring.datasource.username", () -> System.getProperty("it.db.username", "test"));
-    registry.add("spring.datasource.password", () -> System.getProperty("it.db.password", "test"));
+        registry.add("spring.datasource.url", () -> System.getProperty(
+                "it.db.url",
+                "jdbc:postgresql://localhost:55432/cbs_account_it"));
+        registry.add("spring.datasource.username", () -> System.getProperty("it.db.username", "test"));
+        registry.add("spring.datasource.password", () -> System.getProperty("it.db.password", "test"));
     }
 
     @Autowired
@@ -51,8 +51,8 @@ class AccountServicePostgresIntegrationTest {
                 101L,
                 "  tr-acc-0001  ",
                 AccountType.SAVINGS,
-                new BigDecimal("150.50")
-        );
+                Currency.TRY,
+                new BigDecimal("150.50"));
 
         AccountResponse response = accountService.createAccount(request);
 
@@ -66,11 +66,12 @@ class AccountServicePostgresIntegrationTest {
                 102L,
                 "TR-ACC-0002",
                 AccountType.CHECKING,
-                new BigDecimal("200.00")
-        ));
+                Currency.TRY,
+                new BigDecimal("200.00")));
 
         accountService.creditBalance(created.id(), new BalanceUpdateRequest(new BigDecimal("50.25")));
-        AccountResponse debited = accountService.debitBalance(created.id(), new BalanceUpdateRequest(new BigDecimal("20.00")));
+        AccountResponse debited = accountService.debitBalance(created.id(),
+                new BalanceUpdateRequest(new BigDecimal("20.00")));
 
         assertEquals(new BigDecimal("230.25"), debited.balance());
         Account persisted = accountRepository.findById(created.id()).orElseThrow();
