@@ -1,11 +1,32 @@
-.PHONY: real-it-tests infra-it-tests all-it-tests
+.PHONY: build up down restart ps logs help
 
-real-it-tests:
-	bash scripts/run-real-it-tests.sh
+# Variables
+MVN = mvn
+DOCKER_COMPOSE = docker compose
 
-infra-it-tests:
-	mvn -pl cbs-api-gateway -am test -Dtest=ApiGatewayIntegrationTest -Dsurefire.failIfNoSpecifiedTests=false
-	mvn -pl cbs-config-server -am test -Dtest=ConfigServerIntegrationTest -Dsurefire.failIfNoSpecifiedTests=false
-	mvn -pl cbs-discovery-server -am test -Dtest=DiscoveryServerIntegrationTest -Dsurefire.failIfNoSpecifiedTests=false
+# Default target
+help:
+	@echo "Core Banking System (CBS) Management Commands:"
+	@echo "  make build    - Build all modules locally using Maven (skipping tests)"
+	@echo "  make up       - Start all services using Docker Compose"
+	@echo "  make down     - Stop and remove all containers"
+	@echo "  make restart  - Build and then start all services"
+	@echo "  make ps       - List all running services"
+	@echo "  make logs     - Follow all service logs"
 
-all-it-tests: infra-it-tests real-it-tests
+build:
+	$(MVN) clean package -DskipTests -T 1C
+
+up:
+	$(DOCKER_COMPOSE) up -d --build
+
+down:
+	$(DOCKER_COMPOSE) down
+
+restart: build up
+
+ps:
+	$(DOCKER_COMPOSE) ps
+
+logs:
+	$(DOCKER_COMPOSE) logs -f
