@@ -1,5 +1,7 @@
 package com.cbs.reporting.controller;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
+
 import com.cbs.common.api.ApiResponse;
 import com.cbs.reporting.dto.CreateReportRequest;
 import com.cbs.reporting.dto.ReportResponse;
@@ -22,6 +24,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/reports")
+@Tag(name = "Reporting", description = "Endpoints for generating account statements and audit reports")
 public class ReportingController {
 
     private final ReportingService reportingService;
@@ -46,8 +49,7 @@ public class ReportingController {
     public ResponseEntity<ApiResponse<List<ReportResponse>>> listReports(
             @RequestParam(value = "requestedByCustomerId", required = false) Long requestedByCustomerId,
             @RequestParam(value = "reportType", required = false) ReportType reportType,
-            @RequestParam(value = "status", required = false) ReportStatus status
-    ) {
+            @RequestParam(value = "status", required = false) ReportStatus status) {
         List<ReportResponse> responses = reportingService.listReports(requestedByCustomerId, reportType, status);
         return ResponseEntity.ok(ApiResponse.success("Reports retrieved", responses));
     }
@@ -55,8 +57,7 @@ public class ReportingController {
     @PatchMapping("/{reportId}/status")
     public ResponseEntity<ApiResponse<ReportResponse>> updateStatus(
             @PathVariable("reportId") Long reportId,
-            @Valid @RequestBody UpdateReportStatusRequest request
-    ) {
+            @Valid @RequestBody UpdateReportStatusRequest request) {
         ReportResponse response = reportingService.updateReportStatus(reportId, request);
         return ResponseEntity.ok(ApiResponse.success("Report status updated", response));
     }
@@ -64,8 +65,7 @@ public class ReportingController {
     @PatchMapping("/{reportId}/cancel")
     public ResponseEntity<ApiResponse<ReportResponse>> cancelReport(
             @PathVariable("reportId") Long reportId,
-            @Valid @RequestBody UpdateReportStatusRequest request
-    ) {
+            @Valid @RequestBody UpdateReportStatusRequest request) {
         ReportResponse response = reportingService.cancelReport(reportId, request);
         return ResponseEntity.ok(ApiResponse.success("Report cancelled", response));
     }

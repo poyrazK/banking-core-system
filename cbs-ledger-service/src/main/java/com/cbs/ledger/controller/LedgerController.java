@@ -1,5 +1,7 @@
 package com.cbs.ledger.controller;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
+
 import com.cbs.common.api.ApiResponse;
 import com.cbs.ledger.dto.AccountResponse;
 import com.cbs.ledger.dto.BalanceResponse;
@@ -30,6 +32,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/ledger")
+@Tag(name = "Ledger", description = "Endpoints for general ledger and journal entries")
 @Validated
 public class LedgerController {
 
@@ -38,15 +41,16 @@ public class LedgerController {
     private final LedgerQueryService ledgerQueryService;
 
     public LedgerController(LedgerAccountService ledgerAccountService,
-                            LedgerPostingService ledgerPostingService,
-                            LedgerQueryService ledgerQueryService) {
+            LedgerPostingService ledgerPostingService,
+            LedgerQueryService ledgerQueryService) {
         this.ledgerAccountService = ledgerAccountService;
         this.ledgerPostingService = ledgerPostingService;
         this.ledgerQueryService = ledgerQueryService;
     }
 
     @PostMapping("/accounts")
-    public ResponseEntity<ApiResponse<AccountResponse>> createAccount(@Valid @RequestBody CreateAccountRequest request) {
+    public ResponseEntity<ApiResponse<AccountResponse>> createAccount(
+            @Valid @RequestBody CreateAccountRequest request) {
         AccountResponse response = ledgerAccountService.createAccount(request);
         return ResponseEntity.ok(ApiResponse.success("Account created", response));
     }
@@ -58,22 +62,21 @@ public class LedgerController {
 
     @PostMapping("/entries")
     public ResponseEntity<ApiResponse<PostJournalEntryResponse>> postEntry(
-            @Valid @RequestBody PostJournalEntryRequest request
-    ) {
+            @Valid @RequestBody PostJournalEntryRequest request) {
         PostJournalEntryResponse response = ledgerPostingService.postEntry(request);
         return ResponseEntity.ok(ApiResponse.success("Journal entry posted", response));
     }
 
     @PostMapping("/entries/policy")
     public ResponseEntity<ApiResponse<PostJournalEntryResponse>> postPolicyEntry(
-            @Valid @RequestBody PostPolicyEntryRequest request
-    ) {
+            @Valid @RequestBody PostPolicyEntryRequest request) {
         PostJournalEntryResponse response = ledgerPostingService.postPolicyEntry(request);
         return ResponseEntity.ok(ApiResponse.success("Policy journal entry posted", response));
     }
 
     @GetMapping("/balances/{accountCode}")
-    public ResponseEntity<ApiResponse<BalanceResponse>> getBalance(@PathVariable("accountCode") @NotBlank String accountCode) {
+    public ResponseEntity<ApiResponse<BalanceResponse>> getBalance(
+            @PathVariable("accountCode") @NotBlank String accountCode) {
         BalanceResponse response = ledgerQueryService.getGlBalance(accountCode);
         return ResponseEntity.ok(ApiResponse.success("Balance fetched", response));
     }
@@ -81,8 +84,7 @@ public class LedgerController {
     @GetMapping("/reconciliation")
     public ResponseEntity<ApiResponse<ReconciliationResponse>> reconcile(
             @RequestParam("fromDate") @NotNull @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fromDate,
-            @RequestParam("toDate") @NotNull @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate toDate
-    ) {
+            @RequestParam("toDate") @NotNull @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate toDate) {
         ReconciliationResponse response = ledgerQueryService.reconcile(fromDate, toDate);
         return ResponseEntity.ok(ApiResponse.success("Reconciliation completed", response));
     }

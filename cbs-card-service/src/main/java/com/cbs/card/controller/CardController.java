@@ -7,6 +7,7 @@ import com.cbs.card.dto.UpdateCardLimitRequest;
 import com.cbs.card.model.CardStatus;
 import com.cbs.card.service.CardService;
 import com.cbs.common.api.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -22,6 +23,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/cards")
+@Tag(name = "Cards", description = "Endpoints for debit/credit card management")
 public class CardController {
 
     private final CardService cardService;
@@ -46,8 +48,7 @@ public class CardController {
     public ResponseEntity<ApiResponse<List<CardResponse>>> listCards(
             @RequestParam(value = "customerId", required = false) Long customerId,
             @RequestParam(value = "accountId", required = false) Long accountId,
-            @RequestParam(value = "status", required = false) CardStatus status
-    ) {
+            @RequestParam(value = "status", required = false) CardStatus status) {
         List<CardResponse> responses = cardService.listCards(customerId, accountId, status);
         return ResponseEntity.ok(ApiResponse.success("Cards retrieved", responses));
     }
@@ -61,8 +62,7 @@ public class CardController {
     @PatchMapping("/{cardId}/freeze")
     public ResponseEntity<ApiResponse<CardResponse>> freezeCard(
             @PathVariable("cardId") Long cardId,
-            @Valid @RequestBody CardStatusReasonRequest request
-    ) {
+            @Valid @RequestBody CardStatusReasonRequest request) {
         CardResponse response = cardService.freezeCard(cardId, request);
         return ResponseEntity.ok(ApiResponse.success("Card frozen", response));
     }
@@ -70,8 +70,7 @@ public class CardController {
     @PatchMapping("/{cardId}/block")
     public ResponseEntity<ApiResponse<CardResponse>> blockCard(
             @PathVariable("cardId") Long cardId,
-            @Valid @RequestBody CardStatusReasonRequest request
-    ) {
+            @Valid @RequestBody CardStatusReasonRequest request) {
         CardResponse response = cardService.blockCard(cardId, request);
         return ResponseEntity.ok(ApiResponse.success("Card blocked", response));
     }
@@ -79,8 +78,7 @@ public class CardController {
     @PatchMapping("/{cardId}/limits")
     public ResponseEntity<ApiResponse<CardResponse>> updateLimits(
             @PathVariable("cardId") Long cardId,
-            @Valid @RequestBody UpdateCardLimitRequest request
-    ) {
+            @Valid @RequestBody UpdateCardLimitRequest request) {
         CardResponse response = cardService.updateLimits(cardId, request);
         return ResponseEntity.ok(ApiResponse.success("Card limits updated", response));
     }
@@ -88,8 +86,7 @@ public class CardController {
     @PatchMapping("/{cardId}/close")
     public ResponseEntity<ApiResponse<CardResponse>> closeCard(
             @PathVariable("cardId") Long cardId,
-            @Valid @RequestBody CardStatusReasonRequest request
-    ) {
+            @Valid @RequestBody CardStatusReasonRequest request) {
         CardResponse response = cardService.closeCard(cardId, request);
         return ResponseEntity.ok(ApiResponse.success("Card closed", response));
     }

@@ -6,6 +6,7 @@ import com.cbs.account.dto.CreateAccountRequest;
 import com.cbs.account.dto.UpdateAccountStatusRequest;
 import com.cbs.account.service.AccountService;
 import com.cbs.common.api.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -21,6 +22,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/accounts")
+@Tag(name = "Accounts", description = "Endpoints for bank account management")
 public class AccountController {
 
     private final AccountService accountService;
@@ -30,7 +32,8 @@ public class AccountController {
     }
 
     @PostMapping
-    public ResponseEntity<ApiResponse<AccountResponse>> createAccount(@Valid @RequestBody CreateAccountRequest request) {
+    public ResponseEntity<ApiResponse<AccountResponse>> createAccount(
+            @Valid @RequestBody CreateAccountRequest request) {
         AccountResponse accountResponse = accountService.createAccount(request);
         return ResponseEntity.ok(ApiResponse.success("Account created", accountResponse));
     }
@@ -42,7 +45,8 @@ public class AccountController {
     }
 
     @GetMapping
-    public ResponseEntity<ApiResponse<List<AccountResponse>>> listAccounts(@RequestParam(value = "customerId", required = false) Long customerId) {
+    public ResponseEntity<ApiResponse<List<AccountResponse>>> listAccounts(
+            @RequestParam(value = "customerId", required = false) Long customerId) {
         List<AccountResponse> accountResponses = accountService.listAccounts(customerId);
         return ResponseEntity.ok(ApiResponse.success("Accounts retrieved", accountResponses));
     }
@@ -50,8 +54,7 @@ public class AccountController {
     @PatchMapping("/{accountId}/credit")
     public ResponseEntity<ApiResponse<AccountResponse>> creditBalance(
             @PathVariable("accountId") Long accountId,
-            @Valid @RequestBody BalanceUpdateRequest request
-    ) {
+            @Valid @RequestBody BalanceUpdateRequest request) {
         AccountResponse accountResponse = accountService.creditBalance(accountId, request);
         return ResponseEntity.ok(ApiResponse.success("Account credited", accountResponse));
     }
@@ -59,8 +62,7 @@ public class AccountController {
     @PatchMapping("/{accountId}/debit")
     public ResponseEntity<ApiResponse<AccountResponse>> debitBalance(
             @PathVariable("accountId") Long accountId,
-            @Valid @RequestBody BalanceUpdateRequest request
-    ) {
+            @Valid @RequestBody BalanceUpdateRequest request) {
         AccountResponse accountResponse = accountService.debitBalance(accountId, request);
         return ResponseEntity.ok(ApiResponse.success("Account debited", accountResponse));
     }
@@ -68,8 +70,7 @@ public class AccountController {
     @PatchMapping("/{accountId}/status")
     public ResponseEntity<ApiResponse<AccountResponse>> updateStatus(
             @PathVariable("accountId") Long accountId,
-            @Valid @RequestBody UpdateAccountStatusRequest request
-    ) {
+            @Valid @RequestBody UpdateAccountStatusRequest request) {
         AccountResponse accountResponse = accountService.updateStatus(accountId, request);
         return ResponseEntity.ok(ApiResponse.success("Account status updated", accountResponse));
     }

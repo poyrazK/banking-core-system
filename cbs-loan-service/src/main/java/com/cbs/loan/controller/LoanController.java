@@ -1,5 +1,7 @@
 package com.cbs.loan.controller;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
+
 import com.cbs.common.api.ApiResponse;
 import com.cbs.loan.dto.CreateLoanRequest;
 import com.cbs.loan.dto.LoanDecisionRequest;
@@ -22,6 +24,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/loans")
+@Tag(name = "Loans", description = "Endpoints for loan application, repayment, and status management")
 public class LoanController {
 
     private final LoanService loanService;
@@ -45,8 +48,7 @@ public class LoanController {
     @GetMapping
     public ResponseEntity<ApiResponse<List<LoanResponse>>> listLoans(
             @RequestParam(value = "customerId", required = false) Long customerId,
-            @RequestParam(value = "status", required = false) LoanStatus status
-    ) {
+            @RequestParam(value = "status", required = false) LoanStatus status) {
         List<LoanResponse> responses = loanService.listLoans(customerId, status);
         return ResponseEntity.ok(ApiResponse.success("Loans retrieved", responses));
     }
@@ -60,8 +62,7 @@ public class LoanController {
     @PatchMapping("/{loanId}/reject")
     public ResponseEntity<ApiResponse<LoanResponse>> rejectLoan(
             @PathVariable("loanId") Long loanId,
-            @Valid @RequestBody LoanDecisionRequest request
-    ) {
+            @Valid @RequestBody LoanDecisionRequest request) {
         LoanResponse response = loanService.rejectLoan(loanId, request);
         return ResponseEntity.ok(ApiResponse.success("Loan rejected", response));
     }
@@ -75,8 +76,7 @@ public class LoanController {
     @PatchMapping("/{loanId}/repay")
     public ResponseEntity<ApiResponse<LoanResponse>> repayLoan(
             @PathVariable("loanId") Long loanId,
-            @Valid @RequestBody LoanRepaymentRequest request
-    ) {
+            @Valid @RequestBody LoanRepaymentRequest request) {
         LoanResponse response = loanService.repayLoan(loanId, request);
         return ResponseEntity.ok(ApiResponse.success("Loan repayment posted", response));
     }

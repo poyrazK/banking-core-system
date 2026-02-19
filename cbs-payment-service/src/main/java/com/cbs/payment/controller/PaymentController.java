@@ -1,5 +1,7 @@
 package com.cbs.payment.controller;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
+
 import com.cbs.common.api.ApiResponse;
 import com.cbs.payment.dto.CreatePaymentRequest;
 import com.cbs.payment.dto.PaymentResponse;
@@ -21,6 +23,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/payments")
+@Tag(name = "Payments", description = "Endpoints for payment initiation, tracking, and cancellation")
 public class PaymentController {
 
     private final PaymentService paymentService;
@@ -30,7 +33,8 @@ public class PaymentController {
     }
 
     @PostMapping
-    public ResponseEntity<ApiResponse<PaymentResponse>> createPayment(@Valid @RequestBody CreatePaymentRequest request) {
+    public ResponseEntity<ApiResponse<PaymentResponse>> createPayment(
+            @Valid @RequestBody CreatePaymentRequest request) {
         PaymentResponse response = paymentService.createPayment(request);
         return ResponseEntity.ok(ApiResponse.success("Payment created", response));
     }
@@ -46,9 +50,9 @@ public class PaymentController {
             @RequestParam(value = "customerId", required = false) Long customerId,
             @RequestParam(value = "sourceAccountId", required = false) Long sourceAccountId,
             @RequestParam(value = "destinationAccountId", required = false) Long destinationAccountId,
-            @RequestParam(value = "status", required = false) PaymentStatus status
-    ) {
-        List<PaymentResponse> responses = paymentService.listPayments(customerId, sourceAccountId, destinationAccountId, status);
+            @RequestParam(value = "status", required = false) PaymentStatus status) {
+        List<PaymentResponse> responses = paymentService.listPayments(customerId, sourceAccountId, destinationAccountId,
+                status);
         return ResponseEntity.ok(ApiResponse.success("Payments retrieved", responses));
     }
 
@@ -61,8 +65,7 @@ public class PaymentController {
     @PatchMapping("/{paymentId}/fail")
     public ResponseEntity<ApiResponse<PaymentResponse>> failPayment(
             @PathVariable("paymentId") Long paymentId,
-            @Valid @RequestBody PaymentStatusUpdateRequest request
-    ) {
+            @Valid @RequestBody PaymentStatusUpdateRequest request) {
         PaymentResponse response = paymentService.failPayment(paymentId, request);
         return ResponseEntity.ok(ApiResponse.success("Payment failed", response));
     }
@@ -70,8 +73,7 @@ public class PaymentController {
     @PatchMapping("/{paymentId}/cancel")
     public ResponseEntity<ApiResponse<PaymentResponse>> cancelPayment(
             @PathVariable("paymentId") Long paymentId,
-            @Valid @RequestBody PaymentStatusUpdateRequest request
-    ) {
+            @Valid @RequestBody PaymentStatusUpdateRequest request) {
         PaymentResponse response = paymentService.cancelPayment(paymentId, request);
         return ResponseEntity.ok(ApiResponse.success("Payment cancelled", response));
     }
