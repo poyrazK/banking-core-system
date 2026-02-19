@@ -1,9 +1,0 @@
-spring:
-  jackson:
-    serialization:
-      write-dates-as-timestamps: false
-
-management:
-  endpoint:
-    health:
-      show-details: always
