@@ -29,6 +29,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @WebMvcTest(TransactionController.class)
 @Import(TransactionExceptionHandler.class)
 class TransactionControllerTest {
+    @MockBean
+    private com.cbs.auth.service.JwtService jwtService;
+
+    @MockBean
+    private org.springframework.security.core.userdetails.UserDetailsService userDetailsService;
+
 
     @Autowired
     private MockMvc mockMvc;

@@ -26,6 +26,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @WebMvcTest(FxController.class)
 @Import(FxExceptionHandler.class)
 class FxControllerTest {
+    @MockBean
+    private com.cbs.auth.service.JwtService jwtService;
+
+    @MockBean
+    private org.springframework.security.core.userdetails.UserDetailsService userDetailsService;
+
 
     @Autowired
     private MockMvc mockMvc;

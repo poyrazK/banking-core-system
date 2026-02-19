@@ -25,6 +25,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc(addFilters = false)
 @Import(AuthExceptionHandler.class)
 class AuthControllerTest {
+    @MockBean
+    private com.cbs.auth.service.JwtService jwtService;
+
+    @MockBean
+    private org.springframework.security.core.userdetails.UserDetailsService userDetailsService;
+
 
     @Autowired
     private MockMvc mockMvc;

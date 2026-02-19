@@ -17,11 +17,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 
 @Configuration
 @EnableWebSecurity
-@ConditionalOnProperty(name = "cbs.security.enabled", havingValue = "true", matchIfMissing = true)
 public class SecurityConfig {
 
     @Bean

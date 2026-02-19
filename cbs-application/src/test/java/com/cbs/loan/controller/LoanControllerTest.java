@@ -29,6 +29,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @WebMvcTest(LoanController.class)
 @Import(LoanExceptionHandler.class)
 class LoanControllerTest {
+    @MockBean
+    private com.cbs.auth.service.JwtService jwtService;
+
+    @MockBean
+    private org.springframework.security.core.userdetails.UserDetailsService userDetailsService;
+
 
     @Autowired
     private MockMvc mockMvc;
