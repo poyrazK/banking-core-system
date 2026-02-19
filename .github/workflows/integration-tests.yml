@@ -76,10 +76,10 @@ jobs:
       - name: Run Integration Tests
         run: |
           # Build parent and common first as they are needed by all modules
-          mvn install -DskipTests -am -pl ${{ matrix.module }}
+          mvn install -DskipTests -am -pl :${{ matrix.module }}
           
           # Run the specific integration tests for the module
-          mvn test -pl ${{ matrix.module }} \
+          mvn test -pl :${{ matrix.module }} \
             -DskipTests=false \
             -Dsurefire.failIfNoSpecifiedTests=false \
             -Dit.db.url="jdbc:postgresql://localhost:5432/${{ matrix.db }}" \
