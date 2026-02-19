@@ -8,7 +8,8 @@ import java.util.List;
 public interface CustomerRepository extends JpaRepository<Customer, Long> {
     boolean existsByEmailIgnoreCase(String email);
 
+    boolean existsByEmailIgnoreCaseAndIdNot(String email, Long id);
+
     List<Customer> findByFirstNameContainingIgnoreCaseOrLastNameContainingIgnoreCaseOrEmailContainingIgnoreCase(
-            String firstName, String lastName, String email
-    );
+            String firstName, String lastName, String email);
 }
