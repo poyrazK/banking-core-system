@@ -3,6 +3,7 @@ package com.cbs.transaction.service;
 import com.cbs.transaction.dto.CreateTransactionRequest;
 import com.cbs.transaction.dto.ReverseTransactionRequest;
 import com.cbs.transaction.dto.TransactionResponse;
+import com.cbs.transaction.integration.AccountClient;
 import com.cbs.transaction.model.Transaction;
 import com.cbs.transaction.model.TransactionStatus;
 import com.cbs.transaction.model.TransactionType;
@@ -11,6 +12,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 
@@ -22,8 +24,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest(properties = {
         "eureka.client.enabled=false",
-    "spring.jpa.hibernate.ddl-auto=create-drop",
-    "ledger.posting.enabled=false"
+        "spring.jpa.hibernate.ddl-auto=create-drop",
+        "ledger.posting.enabled=false"
 })
 class TransactionServicePostgresIntegrationTest {
 
@@ -31,8 +33,7 @@ class TransactionServicePostgresIntegrationTest {
     static void registerDataSource(DynamicPropertyRegistry registry) {
         registry.add("spring.datasource.url", () -> System.getProperty(
                 "it.db.url",
-                "jdbc:postgresql://localhost:55434/cbs_transaction_it"
-        ));
+                "jdbc:postgresql://localhost:55434/cbs_transaction_it"));
         registry.add("spring.datasource.username", () -> System.getProperty("it.db.username", "test"));
         registry.add("spring.datasource.password", () -> System.getProperty("it.db.password", "test"));
     }
@@ -42,6 +43,9 @@ class TransactionServicePostgresIntegrationTest {
 
     @Autowired
     private TransactionRepository transactionRepository;
+
+    @MockBean
+    private AccountClient accountClient;
 
     @AfterEach
     void cleanUp() {
@@ -59,8 +63,9 @@ class TransactionServicePostgresIntegrationTest {
                 "TRY",
                 "Salary transfer",
                 " tx-ref-1 ",
-                LocalDate.of(2026, 2, 18)
-        );
+                LocalDate.of(2026, 2, 18));
+
+        org.mockito.Mockito.when(accountClient.getAccountCurrency(201L)).thenReturn("TRY");
 
         TransactionResponse response = transactionService.createTransaction(request);
 
@@ -71,7 +76,7 @@ class TransactionServicePostgresIntegrationTest {
 
     @Test
     void reverseTransactionPersistsStatusAndReasonInPostgres() {
-        TransactionResponse created = transactionService.createTransaction(new CreateTransactionRequest(
+        CreateTransactionRequest req = new CreateTransactionRequest(
                 102L,
                 202L,
                 null,
@@ -80,13 +85,15 @@ class TransactionServicePostgresIntegrationTest {
                 "USD",
                 "Card payment",
                 "TX-REF-2",
-                LocalDate.of(2026, 2, 18)
-        ));
+                LocalDate.of(2026, 2, 18));
+
+        org.mockito.Mockito.when(accountClient.getAccountCurrency(202L)).thenReturn("USD");
+
+        TransactionResponse created = transactionService.createTransaction(req);
 
         TransactionResponse reversed = transactionService.reverseTransaction(
                 created.id(),
-                new ReverseTransactionRequest(" duplicate posting ")
-        );
+                new ReverseTransactionRequest(" duplicate posting "));
 
         assertEquals(TransactionStatus.REVERSED, reversed.status());
         assertEquals("duplicate posting", reversed.reversalReason());

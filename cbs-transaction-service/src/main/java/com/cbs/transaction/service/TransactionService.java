@@ -4,6 +4,7 @@ import com.cbs.common.exception.ApiException;
 import com.cbs.transaction.dto.CreateTransactionRequest;
 import com.cbs.transaction.dto.ReverseTransactionRequest;
 import com.cbs.transaction.dto.TransactionResponse;
+import com.cbs.transaction.integration.AccountClient;
 import com.cbs.transaction.integration.LedgerPostingClient;
 import com.cbs.transaction.model.Transaction;
 import com.cbs.transaction.model.TransactionStatus;
@@ -18,11 +19,14 @@ public class TransactionService {
 
     private final TransactionRepository transactionRepository;
     private final LedgerPostingClient ledgerPostingClient;
+    private final AccountClient accountClient;
 
     public TransactionService(TransactionRepository transactionRepository,
-                              LedgerPostingClient ledgerPostingClient) {
+            LedgerPostingClient ledgerPostingClient,
+            AccountClient accountClient) {
         this.transactionRepository = transactionRepository;
         this.ledgerPostingClient = ledgerPostingClient;
+        this.accountClient = accountClient;
     }
 
     @Transactional
@@ -30,6 +34,14 @@ public class TransactionService {
         String reference = normalizeReference(request.reference());
         if (transactionRepository.existsByReference(reference)) {
             throw new ApiException("TRANSACTION_REFERENCE_EXISTS", "Reference already exists");
+        }
+
+        // Validate transaction currency matches account currency
+        String accountCurrency = accountClient.getAccountCurrency(request.accountId());
+        String txCurrency = request.currency().trim().toUpperCase();
+        if (!accountCurrency.equals(txCurrency)) {
+            throw new ApiException("CURRENCY_MISMATCH",
+                    "Account currency is " + accountCurrency + " but transaction uses " + txCurrency);
         }
 
         Transaction transaction = new Transaction(
@@ -41,8 +53,7 @@ public class TransactionService {
                 request.currency().trim().toUpperCase(),
                 request.description().trim(),
                 reference,
-                request.valueDate()
-        );
+                request.valueDate());
 
         Transaction createdTransaction = transactionRepository.save(transaction);
         createdTransaction.setStatus(TransactionStatus.PROCESSING);
@@ -88,7 +99,8 @@ public class TransactionService {
     public TransactionResponse reverseTransaction(Long transactionId, ReverseTransactionRequest request) {
         Transaction transaction = findTransaction(transactionId);
 
-        if (transaction.getStatus() == TransactionStatus.INITIATED || transaction.getStatus() == TransactionStatus.PROCESSING) {
+        if (transaction.getStatus() == TransactionStatus.INITIATED
+                || transaction.getStatus() == TransactionStatus.PROCESSING) {
             throw new ApiException("TRANSACTION_NOT_POSTED", "Only posted transaction can be reversed");
         }
 
