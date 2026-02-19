@@ -1,5 +1,7 @@
 package com.cbs.fx.controller;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
+
 import com.cbs.common.api.ApiResponse;
 import com.cbs.fx.dto.BookFxDealRequest;
 import com.cbs.fx.dto.CancelFxDealRequest;
@@ -27,6 +29,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/fx")
+@Tag(name = "Foreign Exchange", description = "Endpoints for currency exchange rates and conversion")
 public class FxController {
 
     private final FxService fxService;
@@ -44,8 +47,7 @@ public class FxController {
     @PatchMapping("/rates/{currencyPair}")
     public ResponseEntity<ApiResponse<FxRateResponse>> updateRate(
             @PathVariable("currencyPair") String currencyPair,
-            @Valid @RequestBody UpdateFxRateRequest request
-    ) {
+            @Valid @RequestBody UpdateFxRateRequest request) {
         FxRateResponse response = fxService.updateRate(currencyPair, request);
         return ResponseEntity.ok(ApiResponse.success("FX rate updated", response));
     }
@@ -58,24 +60,21 @@ public class FxController {
 
     @GetMapping("/rates")
     public ResponseEntity<ApiResponse<List<FxRateResponse>>> listRates(
-            @RequestParam(value = "status", required = false) FxRateStatus status
-    ) {
+            @RequestParam(value = "status", required = false) FxRateStatus status) {
         List<FxRateResponse> responses = fxService.listRates(status);
         return ResponseEntity.ok(ApiResponse.success("FX rates retrieved", responses));
     }
 
     @PostMapping("/quotes")
     public ResponseEntity<ApiResponse<FxQuoteResponse>> createQuote(
-            @Valid @RequestBody CreateFxQuoteRequest request
-    ) {
+            @Valid @RequestBody CreateFxQuoteRequest request) {
         FxQuoteResponse response = fxService.createQuote(request);
         return ResponseEntity.ok(ApiResponse.success("FX quote generated", response));
     }
 
     @PostMapping("/deals")
     public ResponseEntity<ApiResponse<FxDealResponse>> bookDeal(
-            @Valid @RequestBody BookFxDealRequest request
-    ) {
+            @Valid @RequestBody BookFxDealRequest request) {
         FxDealResponse response = fxService.bookDeal(request);
         return ResponseEntity.ok(ApiResponse.success("FX deal booked", response));
     }
@@ -89,8 +88,7 @@ public class FxController {
     @GetMapping("/deals")
     public ResponseEntity<ApiResponse<List<FxDealResponse>>> listDeals(
             @RequestParam(value = "customerId", required = false) Long customerId,
-            @RequestParam(value = "status", required = false) FxDealStatus status
-    ) {
+            @RequestParam(value = "status", required = false) FxDealStatus status) {
         List<FxDealResponse> responses = fxService.listDeals(customerId, status);
         return ResponseEntity.ok(ApiResponse.success("FX deals retrieved", responses));
     }
@@ -98,8 +96,7 @@ public class FxController {
     @PatchMapping("/deals/{dealId}/cancel")
     public ResponseEntity<ApiResponse<FxDealResponse>> cancelDeal(
             @PathVariable("dealId") Long dealId,
-            @Valid @RequestBody CancelFxDealRequest request
-    ) {
+            @Valid @RequestBody CancelFxDealRequest request) {
         FxDealResponse response = fxService.cancelDeal(dealId, request);
         return ResponseEntity.ok(ApiResponse.success("FX deal cancelled", response));
     }

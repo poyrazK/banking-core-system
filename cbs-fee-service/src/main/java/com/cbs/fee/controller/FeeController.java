@@ -1,5 +1,7 @@
 package com.cbs.fee.controller;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
+
 import com.cbs.common.api.ApiResponse;
 import com.cbs.fee.dto.ChargeFeeRequest;
 import com.cbs.fee.dto.CreateFeeConfigRequest;
@@ -23,6 +25,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/fees")
+@Tag(name = "Fees", description = "Endpoints for bank fee configuration and charging")
 public class FeeController {
 
     private final FeeService feeService;
@@ -33,8 +36,7 @@ public class FeeController {
 
     @PostMapping("/configs")
     public ResponseEntity<ApiResponse<FeeConfigResponse>> createConfig(
-            @Valid @RequestBody CreateFeeConfigRequest request
-    ) {
+            @Valid @RequestBody CreateFeeConfigRequest request) {
         FeeConfigResponse response = feeService.createConfig(request);
         return ResponseEntity.ok(ApiResponse.success("Fee config created", response));
     }
@@ -42,8 +44,7 @@ public class FeeController {
     @PatchMapping("/configs/{feeCode}")
     public ResponseEntity<ApiResponse<FeeConfigResponse>> updateConfig(
             @PathVariable("feeCode") String feeCode,
-            @Valid @RequestBody UpdateFeeConfigRequest request
-    ) {
+            @Valid @RequestBody UpdateFeeConfigRequest request) {
         FeeConfigResponse response = feeService.updateConfig(feeCode, request);
         return ResponseEntity.ok(ApiResponse.success("Fee config updated", response));
     }
@@ -56,8 +57,7 @@ public class FeeController {
 
     @GetMapping("/configs")
     public ResponseEntity<ApiResponse<List<FeeConfigResponse>>> listConfigs(
-            @RequestParam(value = "status", required = false) FeeStatus status
-    ) {
+            @RequestParam(value = "status", required = false) FeeStatus status) {
         List<FeeConfigResponse> responses = feeService.listConfigs(status);
         return ResponseEntity.ok(ApiResponse.success("Fee configs retrieved", responses));
     }
@@ -71,8 +71,7 @@ public class FeeController {
     @GetMapping("/charges")
     public ResponseEntity<ApiResponse<List<FeeChargeResponse>>> listCharges(
             @RequestParam(value = "accountId", required = false) Long accountId,
-            @RequestParam(value = "feeCode", required = false) String feeCode
-    ) {
+            @RequestParam(value = "feeCode", required = false) String feeCode) {
         List<FeeChargeResponse> responses = feeService.listCharges(accountId, feeCode);
         return ResponseEntity.ok(ApiResponse.success("Fee charges retrieved", responses));
     }

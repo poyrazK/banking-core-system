@@ -5,6 +5,7 @@ import com.cbs.customer.dto.CreateCustomerRequest;
 import com.cbs.customer.dto.CustomerResponse;
 import com.cbs.customer.dto.UpdateKycStatusRequest;
 import com.cbs.customer.service.CustomerService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -20,6 +21,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/customers")
+@Tag(name = "Customers", description = "Endpoints for customer profile and KYC management")
 public class CustomerController {
 
     private final CustomerService customerService;
@@ -29,7 +31,8 @@ public class CustomerController {
     }
 
     @PostMapping
-    public ResponseEntity<ApiResponse<CustomerResponse>> createCustomer(@Valid @RequestBody CreateCustomerRequest request) {
+    public ResponseEntity<ApiResponse<CustomerResponse>> createCustomer(
+            @Valid @RequestBody CreateCustomerRequest request) {
         CustomerResponse customerResponse = customerService.createCustomer(request);
         return ResponseEntity.ok(ApiResponse.success("Customer created", customerResponse));
     }
@@ -41,7 +44,8 @@ public class CustomerController {
     }
 
     @GetMapping("/search")
-    public ResponseEntity<ApiResponse<List<CustomerResponse>>> searchCustomers(@RequestParam(value = "query", required = false) String query) {
+    public ResponseEntity<ApiResponse<List<CustomerResponse>>> searchCustomers(
+            @RequestParam(value = "query", required = false) String query) {
         List<CustomerResponse> customerResponses = customerService.searchCustomers(query);
         return ResponseEntity.ok(ApiResponse.success("Customers retrieved", customerResponses));
     }
@@ -49,8 +53,7 @@ public class CustomerController {
     @PatchMapping("/{customerId}/kyc-status")
     public ResponseEntity<ApiResponse<CustomerResponse>> updateKycStatus(
             @PathVariable("customerId") Long customerId,
-            @Valid @RequestBody UpdateKycStatusRequest request
-    ) {
+            @Valid @RequestBody UpdateKycStatusRequest request) {
         CustomerResponse customerResponse = customerService.updateKycStatus(customerId, request);
         return ResponseEntity.ok(ApiResponse.success("KYC status updated", customerResponse));
     }

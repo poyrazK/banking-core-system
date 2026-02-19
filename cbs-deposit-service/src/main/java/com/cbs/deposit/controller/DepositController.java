@@ -1,5 +1,7 @@
 package com.cbs.deposit.controller;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
+
 import com.cbs.common.api.ApiResponse;
 import com.cbs.deposit.dto.AccrueInterestRequest;
 import com.cbs.deposit.dto.CreateDepositRequest;
@@ -22,6 +24,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/deposits")
+@Tag(name = "Deposits", description = "Endpoints for fixed and recurring deposit management")
 public class DepositController {
 
     private final DepositService depositService;
@@ -31,7 +34,8 @@ public class DepositController {
     }
 
     @PostMapping
-    public ResponseEntity<ApiResponse<DepositResponse>> createDeposit(@Valid @RequestBody CreateDepositRequest request) {
+    public ResponseEntity<ApiResponse<DepositResponse>> createDeposit(
+            @Valid @RequestBody CreateDepositRequest request) {
         DepositResponse response = depositService.createDeposit(request);
         return ResponseEntity.ok(ApiResponse.success("Deposit account created", response));
     }
@@ -45,8 +49,7 @@ public class DepositController {
     @GetMapping
     public ResponseEntity<ApiResponse<List<DepositResponse>>> listDeposits(
             @RequestParam(value = "customerId", required = false) Long customerId,
-            @RequestParam(value = "status", required = false) DepositStatus status
-    ) {
+            @RequestParam(value = "status", required = false) DepositStatus status) {
         List<DepositResponse> responses = depositService.listDeposits(customerId, status);
         return ResponseEntity.ok(ApiResponse.success("Deposit accounts retrieved", responses));
     }
@@ -54,8 +57,7 @@ public class DepositController {
     @PatchMapping("/{depositId}/accrue")
     public ResponseEntity<ApiResponse<DepositResponse>> accrueInterest(
             @PathVariable("depositId") Long depositId,
-            @Valid @RequestBody AccrueInterestRequest request
-    ) {
+            @Valid @RequestBody AccrueInterestRequest request) {
         DepositResponse response = depositService.accrueInterest(depositId, request);
         return ResponseEntity.ok(ApiResponse.success("Interest accrued", response));
     }
@@ -75,8 +77,7 @@ public class DepositController {
     @PatchMapping("/{depositId}/break")
     public ResponseEntity<ApiResponse<DepositResponse>> breakDeposit(
             @PathVariable("depositId") Long depositId,
-            @Valid @RequestBody DepositStatusReasonRequest request
-    ) {
+            @Valid @RequestBody DepositStatusReasonRequest request) {
         DepositResponse response = depositService.breakDeposit(depositId, request);
         return ResponseEntity.ok(ApiResponse.success("Deposit broken", response));
     }
