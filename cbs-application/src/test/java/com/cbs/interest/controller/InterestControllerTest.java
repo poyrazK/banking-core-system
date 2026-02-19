@@ -23,81 +23,81 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+@org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc(addFilters = false)
 @WebMvcTest(InterestController.class)
 @Import(InterestExceptionHandler.class)
 class InterestControllerTest {
 
-    @Autowired
-    private MockMvc mockMvc;
+        @Autowired
+        private MockMvc mockMvc;
 
-    @MockBean
-    private InterestService interestService;
+        @MockBean
+        private InterestService interestService;
 
-    @Test
-    void createConfig_returnsSuccessResponse() throws Exception {
-        InterestConfigResponse response = new InterestConfigResponse(
-                1L,
-                "SAV-01",
-                BigDecimal.valueOf(12.50),
-                InterestBasis.SIMPLE,
-                30,
-                InterestStatus.ACTIVE
-        );
-        when(interestService.createConfig(any())).thenReturn(response);
+        @Test
+        void createConfig_returnsSuccessResponse() throws Exception {
+                InterestConfigResponse response = new InterestConfigResponse(
+                                1L,
+                                "SAV-01",
+                                BigDecimal.valueOf(12.50),
+                                InterestBasis.SIMPLE,
+                                30,
+                                InterestStatus.ACTIVE);
+                when(interestService.createConfig(any())).thenReturn(response);
 
-        String body = """
-                {
-                  "productCode": "SAV-01",
-                  "annualRate": 12.50,
-                  "interestBasis": "SIMPLE",
-                  "accrualFrequencyDays": 30
-                }
-                """;
+                String body = """
+                                {
+                                  "productCode": "SAV-01",
+                                  "annualRate": 12.50,
+                                  "interestBasis": "SIMPLE",
+                                  "accrualFrequencyDays": 30
+                                }
+                                """;
 
-        mockMvc.perform(post("/api/v1/interests/configs")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(body))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.success").value(true))
-                .andExpect(jsonPath("$.message").value("Interest config created"))
-                .andExpect(jsonPath("$.data.productCode").value("SAV-01"));
-    }
+                mockMvc.perform(post("/api/v1/interests/configs")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(body))
+                                .andExpect(status().isOk())
+                                .andExpect(jsonPath("$.success").value(true))
+                                .andExpect(jsonPath("$.message").value("Interest config created"))
+                                .andExpect(jsonPath("$.data.productCode").value("SAV-01"));
+        }
 
-    @Test
-    void createConfig_returnsBadRequestWhenPayloadIsInvalid() throws Exception {
-        String body = """
-                {
-                  "productCode": "",
-                  "annualRate": 12.50
-                }
-                """;
+        @Test
+        void createConfig_returnsBadRequestWhenPayloadIsInvalid() throws Exception {
+                String body = """
+                                {
+                                  "productCode": "",
+                                  "annualRate": 12.50
+                                }
+                                """;
 
-        mockMvc.perform(post("/api/v1/interests/configs")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(body))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.success").value(false));
-    }
+                mockMvc.perform(post("/api/v1/interests/configs")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(body))
+                                .andExpect(status().isBadRequest())
+                                .andExpect(jsonPath("$.success").value(false));
+        }
 
-    @Test
-    void updateConfig_returnsBusinessErrorWhenConfigMissing() throws Exception {
-        when(interestService.updateConfig(any(), any()))
-                .thenThrow(new ApiException("INTEREST_CONFIG_NOT_FOUND", "Interest config not found"));
+        @Test
+        void updateConfig_returnsBusinessErrorWhenConfigMissing() throws Exception {
+                when(interestService.updateConfig(any(), any()))
+                                .thenThrow(new ApiException("INTEREST_CONFIG_NOT_FOUND", "Interest config not found"));
 
-        String body = """
-                {
-                  "annualRate": 13.00,
-                  "interestBasis": "SIMPLE",
-                  "accrualFrequencyDays": 30,
-                  "status": "ACTIVE"
-                }
-                """;
+                String body = """
+                                {
+                                  "annualRate": 13.00,
+                                  "interestBasis": "SIMPLE",
+                                  "accrualFrequencyDays": 30,
+                                  "status": "ACTIVE"
+                                }
+                                """;
 
-        mockMvc.perform(patch("/api/v1/interests/configs/{productCode}", "SAV-01")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(body))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.success").value(false))
-                .andExpect(jsonPath("$.message").value("Interest config not found"));
-    }
+                mockMvc.perform(patch("/api/v1/interests/configs/{productCode}", "SAV-01")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(body))
+                                .andExpect(status().isBadRequest())
+                                .andExpect(jsonPath("$.success").value(false))
+                                .andExpect(jsonPath("$.message").value("Interest config not found"));
+        }
 }
