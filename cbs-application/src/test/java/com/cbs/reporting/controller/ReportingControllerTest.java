@@ -2,7 +2,7 @@ package com.cbs.reporting.controller;
 
 import com.cbs.common.exception.ApiException;
 import com.cbs.reporting.dto.ReportResponse;
-import com.cbs.reporting.exception.ReportingExceptionHandler;
+import com.cbs.common.exception.GlobalExceptionHandler;
 import com.cbs.reporting.model.ReportFormat;
 import com.cbs.reporting.model.ReportStatus;
 import com.cbs.reporting.model.ReportType;
@@ -26,7 +26,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc(addFilters = false)
 @WebMvcTest(ReportingController.class)
-@Import(ReportingExceptionHandler.class)
+@Import(GlobalExceptionHandler.class)
 class ReportingControllerTest {
     @MockBean
     private com.cbs.auth.service.JwtService jwtService;

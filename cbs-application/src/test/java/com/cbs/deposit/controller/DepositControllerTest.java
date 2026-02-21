@@ -2,7 +2,7 @@ package com.cbs.deposit.controller;
 
 import com.cbs.common.exception.ApiException;
 import com.cbs.deposit.dto.DepositResponse;
-import com.cbs.deposit.exception.DepositExceptionHandler;
+import com.cbs.common.exception.GlobalExceptionHandler;
 import com.cbs.deposit.model.DepositProductType;
 import com.cbs.deposit.model.DepositStatus;
 import com.cbs.deposit.service.DepositService;
@@ -27,7 +27,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc(addFilters = false)
 @WebMvcTest(DepositController.class)
-@Import(DepositExceptionHandler.class)
+@Import(GlobalExceptionHandler.class)
 class DepositControllerTest {
     @MockBean
     private com.cbs.auth.service.JwtService jwtService;

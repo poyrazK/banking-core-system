@@ -2,7 +2,7 @@ package com.cbs.customer.controller;
 
 import com.cbs.common.exception.ApiException;
 import com.cbs.customer.dto.CustomerResponse;
-import com.cbs.customer.exception.CustomerExceptionHandler;
+import com.cbs.common.exception.GlobalExceptionHandler;
 import com.cbs.customer.model.KycStatus;
 import com.cbs.customer.service.CustomerService;
 import org.junit.jupiter.api.Test;
@@ -23,7 +23,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc(addFilters = false)
 @WebMvcTest(CustomerController.class)
-@Import(CustomerExceptionHandler.class)
+@Import(GlobalExceptionHandler.class)
 class CustomerControllerTest {
     @MockBean
     private com.cbs.auth.service.JwtService jwtService;

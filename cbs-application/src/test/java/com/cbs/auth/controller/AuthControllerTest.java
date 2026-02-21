@@ -1,7 +1,7 @@
 package com.cbs.auth.controller;
 
 import com.cbs.auth.dto.AuthResponse;
-import com.cbs.auth.exception.AuthExceptionHandler;
+import com.cbs.common.exception.GlobalExceptionHandler;
 import com.cbs.auth.service.AuthService;
 import com.cbs.common.exception.ApiException;
 import org.junit.jupiter.api.Test;
@@ -21,7 +21,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @WebMvcTest(AuthController.class)
 @AutoConfigureMockMvc(addFilters = false)
-@Import(AuthExceptionHandler.class)
+@Import(GlobalExceptionHandler.class)
 class AuthControllerTest {
         @MockBean
         private com.cbs.auth.service.JwtService jwtService;

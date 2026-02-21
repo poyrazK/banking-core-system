@@ -3,7 +3,7 @@ package com.cbs.ledger.controller;
 import com.cbs.ledger.dto.AccountResponse;
 import com.cbs.ledger.dto.PostJournalEntryResponse;
 import com.cbs.ledger.dto.ReconciliationResponse;
-import com.cbs.ledger.exception.LedgerExceptionHandler;
+import com.cbs.common.exception.GlobalExceptionHandler;
 import com.cbs.ledger.model.AccountType;
 import com.cbs.ledger.service.LedgerAccountService;
 import com.cbs.ledger.service.LedgerPostingService;
@@ -28,7 +28,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc(addFilters = false)
 @WebMvcTest(LedgerController.class)
-@Import(LedgerExceptionHandler.class)
+@Import(GlobalExceptionHandler.class)
 class LedgerControllerTest {
     @MockBean
     private com.cbs.auth.service.JwtService jwtService;

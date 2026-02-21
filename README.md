@@ -25,6 +25,12 @@ Microservices-based Core Banking System built with Java 21 LTS, Spring Boot, Spr
 ## Shared Audit Logging
 `cbs-common` includes reusable audit helpers under `com.cbs.common.audit`: use `AuditLogHelper.success(...)` / `failure(...)` to build an `AuditEvent`, then log `AuditLogHelper.toStructuredFields(event)` for consistent structured audit entries across services.
 
+## Standardized Error Handling
+The system uses a centralized error handling strategy via `GlobalExceptionHandler` in `cbs-common`. 
+- **ApiException**: Domain-specific exceptions that include a machine-readable `errorCode` and an `HttpStatus`.
+- **Validation Errors**: Standardized handling of `MethodArgumentNotValidException` with field-level details.
+- All error responses follow a consistent `ApiResponse` structure with `success`, `message`, `errorCode`, `timestamp`, and `data` fields.
+
 ## Docker (PostgreSQL Init)
 PostgreSQL mounts initialization scripts from `db/init` and auto-creates service databases on first startup.
 

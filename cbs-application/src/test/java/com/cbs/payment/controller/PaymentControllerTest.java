@@ -2,7 +2,7 @@ package com.cbs.payment.controller;
 
 import com.cbs.common.exception.ApiException;
 import com.cbs.payment.dto.PaymentResponse;
-import com.cbs.payment.exception.PaymentExceptionHandler;
+import com.cbs.common.exception.GlobalExceptionHandler;
 import com.cbs.payment.model.PaymentMethod;
 import com.cbs.payment.model.PaymentStatus;
 import com.cbs.payment.service.PaymentService;
@@ -27,7 +27,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc(addFilters = false)
 @WebMvcTest(PaymentController.class)
-@Import(PaymentExceptionHandler.class)
+@Import(GlobalExceptionHandler.class)
 class PaymentControllerTest {
     @MockBean
     private com.cbs.auth.service.JwtService jwtService;

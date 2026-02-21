@@ -1,7 +1,7 @@
 package com.cbs.account.controller;
 
 import com.cbs.account.dto.AccountResponse;
-import com.cbs.account.exception.AccountExceptionHandler;
+import com.cbs.common.exception.GlobalExceptionHandler;
 import com.cbs.account.model.AccountStatus;
 import com.cbs.account.model.AccountType;
 import com.cbs.account.model.Currency;
@@ -27,7 +27,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc(addFilters = false)
 @WebMvcTest(AccountController.class)
-@Import(AccountExceptionHandler.class)
+@Import(GlobalExceptionHandler.class)
 class AccountControllerTest {
     @MockBean
     private com.cbs.auth.service.JwtService jwtService;

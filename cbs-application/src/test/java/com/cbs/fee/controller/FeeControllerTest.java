@@ -2,7 +2,7 @@ package com.cbs.fee.controller;
 
 import com.cbs.common.exception.ApiException;
 import com.cbs.fee.dto.FeeConfigResponse;
-import com.cbs.fee.exception.FeeExceptionHandler;
+import com.cbs.common.exception.GlobalExceptionHandler;
 import com.cbs.fee.model.FeeStatus;
 import com.cbs.fee.model.FeeType;
 import com.cbs.fee.service.FeeService;
@@ -25,7 +25,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc(addFilters = false)
 @WebMvcTest(FeeController.class)
-@Import(FeeExceptionHandler.class)
+@Import(GlobalExceptionHandler.class)
 class FeeControllerTest {
     @MockBean
     private com.cbs.auth.service.JwtService jwtService;

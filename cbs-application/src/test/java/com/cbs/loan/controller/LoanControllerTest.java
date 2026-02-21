@@ -2,7 +2,7 @@ package com.cbs.loan.controller;
 
 import com.cbs.common.exception.ApiException;
 import com.cbs.loan.dto.LoanResponse;
-import com.cbs.loan.exception.LoanExceptionHandler;
+import com.cbs.common.exception.GlobalExceptionHandler;
 import com.cbs.loan.model.AmortizationType;
 import com.cbs.loan.model.LoanStatus;
 import com.cbs.loan.model.LoanType;
@@ -31,7 +31,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc(addFilters = false)
 @WebMvcTest(LoanController.class)
-@Import(LoanExceptionHandler.class)
+@Import(GlobalExceptionHandler.class)
 class LoanControllerTest {
         @MockBean
         private com.cbs.auth.service.JwtService jwtService;
