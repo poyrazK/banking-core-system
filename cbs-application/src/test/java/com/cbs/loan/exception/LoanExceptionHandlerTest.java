@@ -16,8 +16,7 @@ class LoanExceptionHandlerTest {
         LoanExceptionHandler handler = new LoanExceptionHandler();
 
         ResponseEntity<ApiResponse<Void>> response = handler.handleApiException(
-                new ApiException("LOAN_NOT_FOUND", "Loan not found")
-        );
+                new ApiException("LOAN_NOT_FOUND", "Loan not found"));
 
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
         assertNotNull(response.getBody());

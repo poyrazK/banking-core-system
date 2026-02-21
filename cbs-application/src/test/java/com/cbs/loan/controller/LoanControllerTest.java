@@ -12,6 +12,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import com.cbs.loan.dto.LoanScheduleResponse;
+import java.util.List;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
@@ -23,6 +25,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -120,6 +123,34 @@ class LoanControllerTest {
                                 .andExpect(jsonPath("$.success").value(false))
                                 .andExpect(jsonPath("$.message")
                                                 .value("Repayments are allowed only for disbursed loans"));
+        }
+
+        @Test
+        void getLoanSchedule_returnsSuccessResponse_whenFound() throws Exception {
+                LoanScheduleResponse response = new LoanScheduleResponse(
+                                1L, "LOAN-100", BigDecimal.valueOf(10000), BigDecimal.valueOf(12.5), 12,
+                                AmortizationType.ANNUITY, BigDecimal.valueOf(1200), BigDecimal.valueOf(11200),
+                                List.of());
+
+                when(loanService.getSchedule(1L)).thenReturn(response);
+
+                mockMvc.perform(get("/api/v1/loans/{loanId}/schedule", 1L))
+                                .andExpect(status().isOk())
+                                .andExpect(jsonPath("$.success").value(true))
+                                .andExpect(jsonPath("$.data.loanNumber").value("LOAN-100"));
+        }
+
+        @Test
+        void getLoanSchedule_returns404_whenNotFound() throws Exception {
+                when(loanService.getSchedule(2L))
+                                .thenThrow(new ApiException("LOAN_SCHEDULE_NOT_FOUND",
+                                                "Amortization schedule not found for loan ID: 2"));
+
+                mockMvc.perform(get("/api/v1/loans/{loanId}/schedule", 2L))
+                                .andExpect(status().isBadRequest())
+                                .andExpect(jsonPath("$.success").value(false))
+                                .andExpect(jsonPath("$.message")
+                                                .value("Amortization schedule not found for loan ID: 2"));
         }
 
         private record RepaymentPayload(BigDecimal amount) {
