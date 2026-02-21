@@ -12,6 +12,7 @@ public record TransactionResponse(
         Long customerId,
         Long accountId,
         Long counterpartyAccountId,
+        Long cardId,
         TransactionType type,
         TransactionStatus status,
         BigDecimal amount,
@@ -20,14 +21,14 @@ public record TransactionResponse(
         String reference,
         LocalDate valueDate,
         String reversalReason,
-        String failureReason
-) {
+        String failureReason) {
     public static TransactionResponse from(Transaction transaction) {
         return new TransactionResponse(
                 transaction.getId(),
                 transaction.getCustomerId(),
                 transaction.getAccountId(),
                 transaction.getCounterpartyAccountId(),
+                transaction.getCardId(),
                 transaction.getType(),
                 transaction.getStatus(),
                 transaction.getAmount(),
@@ -36,7 +37,6 @@ public record TransactionResponse(
                 transaction.getReference(),
                 transaction.getValueDate(),
                 transaction.getReversalReason(),
-                transaction.getFailureReason()
-        );
+                transaction.getFailureReason());
     }
 }

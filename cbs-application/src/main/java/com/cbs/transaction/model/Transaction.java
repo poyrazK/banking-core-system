@@ -15,10 +15,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 
 @Entity
-@Table(
-        name = "transactions",
-        uniqueConstraints = @UniqueConstraint(name = "uk_transactions_reference", columnNames = "reference")
-)
+@Table(name = "transactions", uniqueConstraints = @UniqueConstraint(name = "uk_transactions_reference", columnNames = "reference"))
 public class Transaction extends AuditableEntity {
 
     @Id
@@ -33,6 +30,9 @@ public class Transaction extends AuditableEntity {
 
     @Column
     private Long counterpartyAccountId;
+
+    @Column
+    private Long cardId;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 16)
@@ -67,17 +67,19 @@ public class Transaction extends AuditableEntity {
     }
 
     public Transaction(Long customerId,
-                       Long accountId,
-                       Long counterpartyAccountId,
-                       TransactionType type,
-                       BigDecimal amount,
-                       String currency,
-                       String description,
-                       String reference,
-                       LocalDate valueDate) {
+            Long accountId,
+            Long counterpartyAccountId,
+            Long cardId,
+            TransactionType type,
+            BigDecimal amount,
+            String currency,
+            String description,
+            String reference,
+            LocalDate valueDate) {
         this.customerId = customerId;
         this.accountId = accountId;
         this.counterpartyAccountId = counterpartyAccountId;
+        this.cardId = cardId;
         this.type = type;
         this.amount = amount;
         this.currency = currency;
@@ -100,6 +102,10 @@ public class Transaction extends AuditableEntity {
 
     public Long getCounterpartyAccountId() {
         return counterpartyAccountId;
+    }
+
+    public Long getCardId() {
+        return cardId;
     }
 
     public TransactionType getType() {

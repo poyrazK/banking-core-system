@@ -1,5 +1,6 @@
 package com.cbs.transaction.service;
 
+import com.cbs.card.service.CardSpendingService;
 import com.cbs.common.exception.ApiException;
 import com.cbs.transaction.dto.CreateTransactionRequest;
 import com.cbs.transaction.dto.ReverseTransactionRequest;
@@ -20,13 +21,16 @@ public class TransactionService {
     private final TransactionRepository transactionRepository;
     private final LedgerPostingClient ledgerPostingClient;
     private final AccountClient accountClient;
+    private final CardSpendingService cardSpendingService;
 
     public TransactionService(TransactionRepository transactionRepository,
             LedgerPostingClient ledgerPostingClient,
-            AccountClient accountClient) {
+            AccountClient accountClient,
+            CardSpendingService cardSpendingService) {
         this.transactionRepository = transactionRepository;
         this.ledgerPostingClient = ledgerPostingClient;
         this.accountClient = accountClient;
+        this.cardSpendingService = cardSpendingService;
     }
 
     @Transactional
@@ -44,10 +48,17 @@ public class TransactionService {
                     "Account currency is " + accountCurrency + " but transaction uses " + txCurrency);
         }
 
+        // Enforce card spending limits if this is a card-based transaction
+        if (request.cardId() != null) {
+            cardSpendingService.validateAndRecordSpending(
+                    request.cardId(), request.amount(), reference);
+        }
+
         Transaction transaction = new Transaction(
                 request.customerId(),
                 request.accountId(),
                 request.counterpartyAccountId(),
+                request.cardId(),
                 request.type(),
                 request.amount(),
                 request.currency().trim().toUpperCase(),

@@ -1,5 +1,6 @@
 package com.cbs.transaction.service;
 
+import com.cbs.card.service.CardSpendingService;
 import com.cbs.common.exception.ApiException;
 import com.cbs.transaction.dto.CreateTransactionRequest;
 import com.cbs.transaction.dto.ReverseTransactionRequest;
@@ -40,11 +41,15 @@ class TransactionServiceTest {
     @Mock
     private AccountClient accountClient;
 
+    @Mock
+    private CardSpendingService cardSpendingService;
+
     private TransactionService transactionService;
 
     @BeforeEach
     void setUp() {
-        transactionService = new TransactionService(transactionRepository, ledgerPostingClient, accountClient);
+        transactionService = new TransactionService(
+                transactionRepository, ledgerPostingClient, accountClient, cardSpendingService);
     }
 
     @Test
@@ -53,6 +58,7 @@ class TransactionServiceTest {
                 1L,
                 10L,
                 20L,
+                null,
                 TransactionType.TRANSFER,
                 BigDecimal.valueOf(100.50),
                 "try",
@@ -79,6 +85,7 @@ class TransactionServiceTest {
                 1L,
                 10L,
                 20L,
+                null,
                 TransactionType.PAYMENT,
                 BigDecimal.valueOf(40.50),
                 "TRY",
@@ -105,6 +112,7 @@ class TransactionServiceTest {
                 1L,
                 10L,
                 null,
+                null,
                 TransactionType.PAYMENT,
                 BigDecimal.TEN,
                 "TRY",
@@ -125,6 +133,7 @@ class TransactionServiceTest {
         CreateTransactionRequest request = new CreateTransactionRequest(
                 1L,
                 10L,
+                null,
                 null,
                 TransactionType.DEPOSIT,
                 BigDecimal.valueOf(100),
@@ -157,6 +166,7 @@ class TransactionServiceTest {
                 1L,
                 10L,
                 null,
+                null,
                 TransactionType.DEPOSIT,
                 BigDecimal.ONE,
                 "TRY",
@@ -178,6 +188,7 @@ class TransactionServiceTest {
         Transaction transaction = new Transaction(
                 1L,
                 10L,
+                null,
                 null,
                 TransactionType.DEPOSIT,
                 BigDecimal.ONE,
@@ -202,6 +213,7 @@ class TransactionServiceTest {
                 1L,
                 10L,
                 20L,
+                null,
                 TransactionType.TRANSFER,
                 BigDecimal.valueOf(55.00),
                 "TRY",
@@ -226,6 +238,7 @@ class TransactionServiceTest {
         Transaction transaction = new Transaction(
                 1L,
                 10L,
+                null,
                 null,
                 TransactionType.DEPOSIT,
                 BigDecimal.ONE,
