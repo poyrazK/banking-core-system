@@ -74,29 +74,29 @@ for db in "${DATABASES[@]}"; do
     | grep -q 1 || docker exec "$CONTAINER_NAME" psql -U "$IT_DB_USER" -d postgres -v ON_ERROR_STOP=1 -c "CREATE DATABASE \"${db}\""
 done
 
-TEST_MATRIX=(
-  "cbs-account-service:AccountServicePostgresIntegrationTest:cbs_account_it"
-  "cbs-ledger-service:LedgerServicePostgresIntegrationTest:cbs_ledger_it"
-  "cbs-transaction-service:TransactionServicePostgresIntegrationTest:cbs_transaction_it"
-  "cbs-payment-service:PaymentServicePostgresIntegrationTest:cbs_payment_it"
-  "cbs-loan-service:LoanServicePostgresIntegrationTest:cbs_loan_it"
-  "cbs-deposit-service:DepositServicePostgresIntegrationTest:cbs_deposit_it"
-  "cbs-interest-service:InterestServicePostgresIntegrationTest:cbs_interest_it"
-  "cbs-fee-service:FeeServicePostgresIntegrationTest:cbs_fee_it"
-  "cbs-card-service:CardServicePostgresIntegrationTest:cbs_card_it"
-  "cbs-fx-service:FxServicePostgresIntegrationTest:cbs_fx_it"
-  "cbs-notification-service:NotificationServicePostgresIntegrationTest:cbs_notification_it"
-  "cbs-reporting-service:ReportingServicePostgresIntegrationTest:cbs_reporting_it"
-  "cbs-auth-service:AuthServicePostgresIntegrationTest:cbs_auth_it"
-  "cbs-customer-service:CustomerServicePostgresIntegrationTest:cbs_customer_it"
+TEST_CLASSES=(
+  "com.cbs.account.service.AccountServicePostgresIntegrationTest"
+  "com.cbs.ledger.service.LedgerServicePostgresIntegrationTest"
+  "com.cbs.transaction.service.TransactionServicePostgresIntegrationTest"
+  "com.cbs.payment.service.PaymentServicePostgresIntegrationTest"
+  "com.cbs.loan.service.LoanServicePostgresIntegrationTest"
+  "com.cbs.deposit.service.DepositServicePostgresIntegrationTest"
+  "com.cbs.interest.service.InterestServicePostgresIntegrationTest"
+  "com.cbs.fee.service.FeeServicePostgresIntegrationTest"
+  "com.cbs.card.service.CardServicePostgresIntegrationTest"
+  "com.cbs.fx.service.FxServicePostgresIntegrationTest"
+  "com.cbs.notification.service.NotificationServicePostgresIntegrationTest"
+  "com.cbs.reporting.service.ReportingServicePostgresIntegrationTest"
+  "com.cbs.auth.service.AuthServicePostgresIntegrationTest"
+  "com.cbs.customer.service.CustomerServicePostgresIntegrationTest"
 )
 
-for entry in "${TEST_MATRIX[@]}"; do
-  IFS=':' read -r module test_class db_name <<< "$entry"
+for test_class in "${TEST_CLASSES[@]}"; do
+  domain=$(echo "$test_class" | cut -d. -f3)
+  db_name="cbs_${domain}_it"
   echo
-  echo "=== Running ${module} / ${test_class} ==="
-  mvn -pl "$module" -am test \
-    -DskipITs \
+  echo "=== Running ${domain} / ${test_class} ==="
+  mvn -pl :cbs-application test \
     -Dtest="$test_class" \
     -Dsurefire.failIfNoSpecifiedTests=false \
     -Dit.db.url="jdbc:postgresql://localhost:${IT_DB_PORT}/${db_name}" \
