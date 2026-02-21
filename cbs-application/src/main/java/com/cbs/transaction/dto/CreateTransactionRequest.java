@@ -12,14 +12,14 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 
 public record CreateTransactionRequest(
-        @NotNull Long customerId,
-        @NotNull Long accountId,
-        Long counterpartyAccountId,
-        @NotNull TransactionType type,
-        @NotNull @DecimalMin("0.01") @Digits(integer = 17, fraction = 2) BigDecimal amount,
-        @NotBlank @Pattern(regexp = "^[A-Z]{3}$") String currency,
-        @NotBlank @Size(max = 255) String description,
-        @NotBlank @Size(max = 64) String reference,
-        @NotNull LocalDate valueDate
-) {
+                @NotNull Long customerId,
+                @NotNull Long accountId,
+                Long counterpartyAccountId,
+                Long cardId,
+                @NotNull TransactionType type,
+                @NotNull @DecimalMin("0.01") @Digits(integer = 17, fraction = 2) BigDecimal amount,
+                @NotBlank @Pattern(regexp = "^[A-Z]{3}$") String currency,
+                @NotBlank @Size(max = 255) String description,
+                @NotBlank @Size(max = 64) String reference,
+                @NotNull LocalDate valueDate) {
 }
