@@ -21,4 +21,6 @@ This directory documents architecture and service-boundary decisions for CBS.
 - [ADR-0016 Reporting Service Boundary](0016-reporting-service-boundary.md)
 - [ADR-0017 Config Server Boundary](0017-config-server-boundary.md)
 - [ADR-0018 Discovery Server Boundary](0018-discovery-server-boundary.md)
+- [ADR-0019 Cross Currency Validation](0019-cross-currency-validation.md)
 - [ADR-0020 Migration to Java 21 LTS](0020-migration-to-java-21.md)
+- [ADR-0021 Card Spending Limits Enforcement](0021-card-spending-limits-enforcement.md)
