@@ -13,7 +13,7 @@ public class ApiException extends RuntimeException {
     public ApiException(String errorCode, String message, HttpStatus httpStatus) {
         super(message);
         this.errorCode = errorCode;
-        this.httpStatus = httpStatus;
+        this.httpStatus = java.util.Objects.requireNonNull(httpStatus, "httpStatus must not be null");
     }
 
     public String getErrorCode() {

@@ -26,10 +26,27 @@ Microservices-based Core Banking System built with Java 21 LTS, Spring Boot, Spr
 `cbs-common` includes reusable audit helpers under `com.cbs.common.audit`: use `AuditLogHelper.success(...)` / `failure(...)` to build an `AuditEvent`, then log `AuditLogHelper.toStructuredFields(event)` for consistent structured audit entries across services.
 
 ## Standardized Error Handling
-The system uses a centralized error handling strategy via `GlobalExceptionHandler` in `cbs-common`. 
-- **ApiException**: Domain-specific exceptions that include a machine-readable `errorCode` and an `HttpStatus`.
-- **Validation Errors**: Standardized handling of `MethodArgumentNotValidException` with field-level details.
-- All error responses follow a consistent `ApiResponse` structure with `success`, `message`, `errorCode`, `timestamp`, and `data` fields.
+The system uses a centralized error handling strategy via `com.cbs.common.exception.GlobalExceptionHandler` in `cbs-common`. 
+
+- **ApiException**: Domain-specific exceptions.
+  - Can specify a machine-readable `errorCode` and an `HttpStatus`.
+  - If no `HttpStatus` is provided, it defaults to `400 Bad Request`.
+- **Validation Errors**: Standardized handling of `MethodArgumentNotValidException`. 
+  - Collects and joins all field-level validation failures (e.g., "fieldName: error message").
+- **Catch-all**: Unhandled exceptions are logged as errors and return `500 Internal Server Error`.
+
+### Error Response Structure
+All error responses follow the consistent `ApiResponse` structure:
+
+```json
+{
+  "success": false,
+  "message": "Detailed error message or validation failures",
+  "errorCode": "MACHINE_READABLE_CODE",
+  "data": null,
+  "timestamp": "2026-02-21T17:27:12.456Z"
+}
+```
 
 ## Docker (PostgreSQL Init)
 PostgreSQL mounts initialization scripts from `db/init` and auto-creates service databases on first startup.

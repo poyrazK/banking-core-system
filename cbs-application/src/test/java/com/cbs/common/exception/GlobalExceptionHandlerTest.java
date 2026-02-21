@@ -31,6 +31,10 @@ class GlobalExceptionHandlerTest {
         ResponseEntity<ApiResponse<Void>> response = handler.handleApiException(exception);
 
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        assertNotNull(response.getBody());
+        assertEquals("ERROR", response.getBody().errorCode());
+        assertEquals("Generic message", response.getBody().message());
+        assertEquals(null, response.getBody().data());
     }
 
     @Test

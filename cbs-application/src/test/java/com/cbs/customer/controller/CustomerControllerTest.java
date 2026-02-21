@@ -25,12 +25,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @WebMvcTest(CustomerController.class)
 @Import(GlobalExceptionHandler.class)
 class CustomerControllerTest {
-    @MockBean
-    private com.cbs.auth.service.JwtService jwtService;
+  @MockBean
+  private com.cbs.auth.service.JwtService jwtService;
 
-    @MockBean
-    private org.springframework.security.core.userdetails.UserDetailsService userDetailsService;
-
+  @MockBean
+  private org.springframework.security.core.userdetails.UserDetailsService userDetailsService;
 
   @Autowired
   private MockMvc mockMvc;
@@ -104,6 +103,25 @@ class CustomerControllerTest {
         .andExpect(status().isBadRequest())
         .andExpect(jsonPath("$.success").value(false))
         .andExpect(jsonPath("$.message").value("Customer not found"));
+  }
+
+  @Test
+  void updateKycStatus_returnsConflictResponse_whenDuplicate() throws Exception {
+    when(customerService.updateKycStatus(any(), any()))
+        .thenThrow(new ApiException("CONFLICT", "Duplicate resource", org.springframework.http.HttpStatus.CONFLICT));
+
+    String body = """
+        {
+          "kycStatus": "VERIFIED"
+        }
+        """;
+
+    mockMvc.perform(patch("/api/v1/customers/{customerId}/kyc-status", 1)
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(body))
+        .andExpect(status().isConflict())
+        .andExpect(jsonPath("$.success").value(false))
+        .andExpect(jsonPath("$.message").value("Duplicate resource"));
   }
 
   @Test

@@ -30,116 +30,139 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @WebMvcTest(LedgerController.class)
 @Import(GlobalExceptionHandler.class)
 class LedgerControllerTest {
-    @MockBean
-    private com.cbs.auth.service.JwtService jwtService;
+        @MockBean
+        private com.cbs.auth.service.JwtService jwtService;
 
-    @MockBean
-    private org.springframework.security.core.userdetails.UserDetailsService userDetailsService;
+        @MockBean
+        private org.springframework.security.core.userdetails.UserDetailsService userDetailsService;
 
+        @Autowired
+        private MockMvc mockMvc;
 
-    @Autowired
-    private MockMvc mockMvc;
+        @MockBean
+        private LedgerAccountService ledgerAccountService;
 
-    @MockBean
-    private LedgerAccountService ledgerAccountService;
+        @MockBean
+        private LedgerPostingService ledgerPostingService;
 
-    @MockBean
-    private LedgerPostingService ledgerPostingService;
+        @MockBean
+        private LedgerQueryService ledgerQueryService;
 
-    @MockBean
-    private LedgerQueryService ledgerQueryService;
+        @Test
+        void createAccount_returnsSuccessResponse() throws Exception {
+                when(ledgerAccountService.createAccount(any())).thenReturn(new AccountResponse(
+                                1L,
+                                "1000",
+                                "Cash",
+                                AccountType.ASSET,
+                                true));
 
-    @Test
-    void createAccount_returnsSuccessResponse() throws Exception {
-        when(ledgerAccountService.createAccount(any())).thenReturn(new AccountResponse(
-                1L,
-                "1000",
-                "Cash",
-                AccountType.ASSET,
-                true
-        ));
+                String body = """
+                                {
+                                  "code": "1000",
+                                  "name": "Cash",
+                                  "type": "ASSET"
+                                }
+                                """;
 
-        String body = """
-                {
-                  "code": "1000",
-                  "name": "Cash",
-                  "type": "ASSET"
-                }
-                """;
+                mockMvc.perform(post("/api/v1/ledger/accounts")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(body))
+                                .andExpect(status().isOk())
+                                .andExpect(jsonPath("$.success").value(true))
+                                .andExpect(jsonPath("$.message").value("Account created"))
+                                .andExpect(jsonPath("$.data.code").value("1000"));
+        }
 
-        mockMvc.perform(post("/api/v1/ledger/accounts")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(body))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.success").value(true))
-                .andExpect(jsonPath("$.message").value("Account created"))
-                .andExpect(jsonPath("$.data.code").value("1000"));
-    }
+        @Test
+        void createAccount_returnsBadRequestWhenPayloadInvalid() throws Exception {
+                String body = """
+                                {
+                                  "code": "",
+                                  "name": "",
+                                  "type": null
+                                }
+                                """;
 
-    @Test
-    void createAccount_returnsBadRequestWhenPayloadInvalid() throws Exception {
-        String body = """
-                {
-                  "code": "",
-                  "name": "",
-                  "type": null
-                }
-                """;
+                mockMvc.perform(post("/api/v1/ledger/accounts")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(body))
+                                .andExpect(status().isBadRequest())
+                                .andExpect(jsonPath("$.success").value(false))
+                                .andExpect(jsonPath("$.errorCode").value("VALIDATION_ERROR"));
+        }
 
-        mockMvc.perform(post("/api/v1/ledger/accounts")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(body))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.success").value(false))
-                .andExpect(jsonPath("$.errorCode").value("VALIDATION_ERROR"));
-    }
+        @Test
+        void postPolicyEntry_returnsSuccessResponse() throws Exception {
+                when(ledgerPostingService.postPolicyEntry(any())).thenReturn(new PostJournalEntryResponse(
+                                1L,
+                                "PAY-100",
+                                new BigDecimal("200.0000"),
+                                new BigDecimal("200.0000")));
 
-    @Test
-    void postPolicyEntry_returnsSuccessResponse() throws Exception {
-        when(ledgerPostingService.postPolicyEntry(any())).thenReturn(new PostJournalEntryResponse(
-                1L,
-                "PAY-100",
-                new BigDecimal("200.0000"),
-                new BigDecimal("200.0000")
-        ));
+                String body = """
+                                {
+                                  "reference": "PAY-100",
+                                  "description": "Bill payment",
+                                  "valueDate": "2026-02-18",
+                                  "operationType": "PAYMENT",
+                                  "amount": 200.00,
+                                  "accountCode": "1000"
+                                }
+                                """;
 
-        String body = """
-                {
-                  "reference": "PAY-100",
-                  "description": "Bill payment",
-                  "valueDate": "2026-02-18",
-                  "operationType": "PAYMENT",
-                  "amount": 200.00,
-                  "accountCode": "1000"
-                }
-                """;
+                mockMvc.perform(post("/api/v1/ledger/entries/policy")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(body))
+                                .andExpect(status().isOk())
+                                .andExpect(jsonPath("$.success").value(true))
+                                .andExpect(jsonPath("$.message").value("Policy journal entry posted"))
+                                .andExpect(jsonPath("$.data.reference").value("PAY-100"));
+        }
 
-        mockMvc.perform(post("/api/v1/ledger/entries/policy")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(body))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.success").value(true))
-                .andExpect(jsonPath("$.message").value("Policy journal entry posted"))
-                .andExpect(jsonPath("$.data.reference").value("PAY-100"));
-    }
+        @Test
+        void reconcile_returnsSummary() throws Exception {
+                when(ledgerQueryService.reconcile(any(), any())).thenReturn(new ReconciliationResponse(
+                                LocalDate.of(2026, 2, 1),
+                                LocalDate.of(2026, 2, 28),
+                                new BigDecimal("500.0000"),
+                                new BigDecimal("500.0000"),
+                                true,
+                                7L));
 
-    @Test
-    void reconcile_returnsSummary() throws Exception {
-        when(ledgerQueryService.reconcile(any(), any())).thenReturn(new ReconciliationResponse(
-                LocalDate.of(2026, 2, 1),
-                LocalDate.of(2026, 2, 28),
-                new BigDecimal("500.0000"),
-                new BigDecimal("500.0000"),
-                true,
-                7L
-        ));
+                mockMvc.perform(get("/api/v1/ledger/reconciliation")
+                                .param("fromDate", "2026-02-01")
+                                .param("toDate", "2026-02-28"))
+                                .andExpect(status().isOk())
+                                .andExpect(jsonPath("$.success").value(true))
+                                .andExpect(jsonPath("$.data.balanced").value(true))
+                                .andExpect(jsonPath("$.data.entryCount").value(7));
+        }
 
-        mockMvc.perform(get("/api/v1/ledger/reconciliation")
-                        .param("fromDate", "2026-02-01")
-                        .param("toDate", "2026-02-28"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.success").value(true))
-                .andExpect(jsonPath("$.data.balanced").value(true))
-                .andExpect(jsonPath("$.data.entryCount").value(7));
-    }
+        @Test
+        void postPolicyEntry_returnsApiExceptionStatus() throws Exception {
+                when(ledgerPostingService.postPolicyEntry(any()))
+                                .thenThrow(new com.cbs.common.exception.ApiException(
+                                                "UNPROCESSABLE_ENTITY",
+                                                "Cannot post policy entry",
+                                                org.springframework.http.HttpStatus.UNPROCESSABLE_ENTITY));
+
+                String body = """
+                                {
+                                  "reference": "PAY-100",
+                                  "description": "Bill payment",
+                                  "valueDate": "2026-02-18",
+                                  "operationType": "PAYMENT",
+                                  "amount": 200.00,
+                                  "accountCode": "1000"
+                                }
+                                """;
+
+                mockMvc.perform(post("/api/v1/ledger/entries/policy")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(body))
+                                .andExpect(status().isUnprocessableEntity())
+                                .andExpect(jsonPath("$.success").value(false))
+                                .andExpect(jsonPath("$.errorCode").value("UNPROCESSABLE_ENTITY"));
+        }
 }

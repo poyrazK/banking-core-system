@@ -144,10 +144,11 @@ class LoanControllerTest {
         void getLoanSchedule_returns404_whenNotFound() throws Exception {
                 when(loanService.getSchedule(2L))
                                 .thenThrow(new ApiException("LOAN_SCHEDULE_NOT_FOUND",
-                                                "Amortization schedule not found for loan ID: 2"));
+                                                "Amortization schedule not found for loan ID: 2",
+                                                org.springframework.http.HttpStatus.NOT_FOUND));
 
                 mockMvc.perform(get("/api/v1/loans/{loanId}/schedule", 2L))
-                                .andExpect(status().isBadRequest())
+                                .andExpect(status().isNotFound())
                                 .andExpect(jsonPath("$.success").value(false))
                                 .andExpect(jsonPath("$.message")
                                                 .value("Amortization schedule not found for loan ID: 2"));
