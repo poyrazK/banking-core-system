@@ -12,6 +12,7 @@ import com.cbs.ledger.model.LedgerOperationType;
 import com.cbs.ledger.model.LedgerAccount;
 import com.cbs.ledger.repository.JournalEntryRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
@@ -30,12 +31,12 @@ public class LedgerPostingService {
     private final LedgerAccountService ledgerAccountService;
 
     public LedgerPostingService(JournalEntryRepository journalEntryRepository,
-                                LedgerAccountService ledgerAccountService) {
+            LedgerAccountService ledgerAccountService) {
         this.journalEntryRepository = journalEntryRepository;
         this.ledgerAccountService = ledgerAccountService;
     }
 
-    @Transactional
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public PostJournalEntryResponse postEntry(PostJournalEntryRequest request) {
         String reference = request.reference().trim();
         if (journalEntryRepository.existsByReference(reference)) {
@@ -65,7 +66,7 @@ public class LedgerPostingService {
         return new PostJournalEntryResponse(savedEntry.getId(), savedEntry.getReference(), totalDebit, totalCredit);
     }
 
-    @Transactional
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public PostJournalEntryResponse postPolicyEntry(PostPolicyEntryRequest request) {
         String accountCode = request.accountCode().trim().toUpperCase();
         String counterpartyCode = normalizeCounterpartyCode(request.counterpartyAccountCode());
@@ -78,54 +79,44 @@ public class LedgerPostingService {
                     request.valueDate(),
                     List.of(
                             new JournalLineRequest(accountCode, EntryType.DEBIT, request.amount()),
-                            new JournalLineRequest(resolveOrDefault(counterpartyCode, PAYMENT_CLEARING_ACCOUNT), EntryType.CREDIT, request.amount())
-                    )
-            ));
+                            new JournalLineRequest(resolveOrDefault(counterpartyCode, PAYMENT_CLEARING_ACCOUNT),
+                                    EntryType.CREDIT, request.amount()))));
             case TRANSFER -> postEntry(new PostJournalEntryRequest(
                     request.reference(),
                     request.description(),
                     request.valueDate(),
                     List.of(
                             new JournalLineRequest(accountCode, EntryType.DEBIT, request.amount()),
-                            new JournalLineRequest(requireCounterparty(counterpartyCode, operationType), EntryType.CREDIT, request.amount())
-                    )
-            ));
+                            new JournalLineRequest(requireCounterparty(counterpartyCode, operationType),
+                                    EntryType.CREDIT, request.amount()))));
             case DEPOSIT -> postEntry(new PostJournalEntryRequest(
                     request.reference(),
                     request.description(),
                     request.valueDate(),
                     List.of(
                             new JournalLineRequest(accountCode, EntryType.DEBIT, request.amount()),
-                            new JournalLineRequest(CASH_SETTLEMENT_ACCOUNT, EntryType.CREDIT, request.amount())
-                    )
-            ));
+                            new JournalLineRequest(CASH_SETTLEMENT_ACCOUNT, EntryType.CREDIT, request.amount()))));
             case WITHDRAWAL -> postEntry(new PostJournalEntryRequest(
                     request.reference(),
                     request.description(),
                     request.valueDate(),
                     List.of(
                             new JournalLineRequest(CASH_SETTLEMENT_ACCOUNT, EntryType.DEBIT, request.amount()),
-                            new JournalLineRequest(accountCode, EntryType.CREDIT, request.amount())
-                    )
-            ));
+                            new JournalLineRequest(accountCode, EntryType.CREDIT, request.amount()))));
             case FEE -> postEntry(new PostJournalEntryRequest(
                     request.reference(),
                     request.description(),
                     request.valueDate(),
                     List.of(
                             new JournalLineRequest(accountCode, EntryType.DEBIT, request.amount()),
-                            new JournalLineRequest(FEE_INCOME_ACCOUNT, EntryType.CREDIT, request.amount())
-                    )
-            ));
+                            new JournalLineRequest(FEE_INCOME_ACCOUNT, EntryType.CREDIT, request.amount()))));
             case INTEREST -> postEntry(new PostJournalEntryRequest(
                     request.reference(),
                     request.description(),
                     request.valueDate(),
                     List.of(
                             new JournalLineRequest(INTEREST_EXPENSE_ACCOUNT, EntryType.DEBIT, request.amount()),
-                            new JournalLineRequest(accountCode, EntryType.CREDIT, request.amount())
-                    )
-            ));
+                            new JournalLineRequest(accountCode, EntryType.CREDIT, request.amount()))));
         };
     }
 
@@ -140,8 +131,7 @@ public class LedgerPostingService {
         if (counterpartyCode == null) {
             throw new ApiException(
                     "LEDGER_POLICY_COUNTERPARTY_REQUIRED",
-                    "Counterparty account code is required for operation type: " + operationType
-            );
+                    "Counterparty account code is required for operation type: " + operationType);
         }
         return counterpartyCode;
     }
