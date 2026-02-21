@@ -10,13 +10,19 @@ import org.springframework.stereotype.Component;
 public class DirectPaymentLedgerPostingClient implements LedgerPostingClient {
 
     private final LedgerPostingService ledgerPostingService;
+    private final boolean postingEnabled;
 
-    public DirectPaymentLedgerPostingClient(LedgerPostingService ledgerPostingService) {
+    public DirectPaymentLedgerPostingClient(LedgerPostingService ledgerPostingService,
+            @org.springframework.beans.factory.annotation.Value("${ledger.posting.enabled:true}") boolean postingEnabled) {
         this.ledgerPostingService = ledgerPostingService;
+        this.postingEnabled = postingEnabled;
     }
 
     @Override
     public void postPayment(Payment payment) {
+        if (!postingEnabled) {
+            return;
+        }
         PostPolicyEntryRequest request = new PostPolicyEntryRequest(
                 payment.getReference(),
                 payment.getDescription(),
