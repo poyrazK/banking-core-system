@@ -1,32 +1,28 @@
 # Core Banking System (CBS)
 
-Microservices-based Core Banking System built with Java 21 LTS, Spring Boot, Spring Cloud, PostgreSQL, and Kafka.
+Modular Monolith Core Banking System built with Java 21 LTS, Spring Boot, PostgreSQL, and Kafka.
 
-## Modules (Scaffold)
-- `cbs-common`
-- `cbs-config-server`
-- `cbs-discovery-server`
-- `cbs-api-gateway`
-- `cbs-auth-service`
-- `cbs-customer-service`
-- `cbs-account-service`
-- `cbs-transaction-service`
-- `cbs-ledger-service`
-- `cbs-loan-service`
-- `cbs-deposit-service`
-- `cbs-interest-service`
-- `cbs-fee-service`
-- `cbs-payment-service`
-- `cbs-card-service`
-- `cbs-fx-service`
-- `cbs-notification-service`
-- `cbs-reporting-service`
+## Modular Architecture
+The system is built as a single application (`cbs-application`) with strictly decoupled domain packages. Each module resides under `com.cbs`:
 
-## Shared Audit Logging
-`cbs-common` includes reusable audit helpers under `com.cbs.common.audit`: use `AuditLogHelper.success(...)` / `failure(...)` to build an `AuditEvent`, then log `AuditLogHelper.toStructuredFields(event)` for consistent structured audit entries across services.
+- **Auth**: JWT-based security and user management.
+- **Customer**: Customer profile and KYC management.
+- **Account**: Current and savings account management.
+- **Transaction**: Core ledger posting and transaction processing.
+- **Loan**: Loan origination, servicing, and amortization.
+- **Deposit**: Term deposits and interest calculations.
+- **Ledger**: General Ledger and financial reconciliation.
+- **Card**: Debit/Credit card management and spending limits.
+- **Fee**: Flexible fee engine for transactions.
+- **Interest**: Parameter-driven interest rate management.
+- **Payment**: Payment processing and bill pay.
+- **FX**: Foreign exchange and currency conversion.
+- **Notification**: Internal messaging and notifications.
+- **Reporting**: Financial and regulatory reporting.
+- **Common**: Shared domain primitives, utilities, and cross-cutting concerns (Audit, Exceptions).
 
 ## Standardized Error Handling
-The system uses a centralized error handling strategy via `com.cbs.common.exception.GlobalExceptionHandler` in `cbs-common`. 
+The system uses a centralized error handling strategy via `com.cbs.common.exception.GlobalExceptionHandler`.
 
 - **ApiException**: Domain-specific exceptions.
   - Can specify a machine-readable `errorCode` and an `HttpStatus`.
@@ -48,16 +44,11 @@ All error responses follow the consistent `ApiResponse` structure:
 }
 ```
 
-## Docker (PostgreSQL Init)
-PostgreSQL mounts initialization scripts from `db/init` and auto-creates service databases on first startup.
-
-- First run: `docker compose up -d postgres`
-- Re-run initialization when `postgres_data` already exists: `docker compose down -v` then `docker compose up -d postgres`
-
-Scripts under `/docker-entrypoint-initdb.d` run only when Postgres initializes a fresh data directory.
+## Shared Audit Logging
+The `common` package includes reusable audit helpers: use `AuditLogHelper.success(...)` / `failure(...)` to build an `AuditEvent`, then log `AuditLogHelper.toStructuredFields(event)` for consistent structured audit entries.
 
 ## Quick Start (Makefile)
-The easiest way to build and run the entire system:
+The easiest way to build and run the system:
 
 ```bash
 # Build and start everything
@@ -66,9 +57,6 @@ make restart
 # Just start existing build
 make up
 
-# Check status
-make ps
-
 # Follow logs
 make logs
 
@@ -76,65 +64,35 @@ make logs
 make down
 ```
 
-## Docker (Full Stack)
-The entire system can be started with a single command:
+## Docker Environment
+The system runs with a single application container and its dependencies:
 
 ```bash
 docker compose up -d
 ```
 
 This starts:
-- Infrastructure: PostgreSQL 16, Zookeeper, Kafka
-- Discovery Server (Eureka): [http://localhost:8761](http://localhost:8761)
-- Config Server: [http://localhost:8888](http://localhost:8888)
-- API Gateway: [http://localhost:8080](http://localhost:8080)
-- All 15 microservices (Auth, Customer, Account, Transaction, etc.)
+- **cbs-app**: The core modular monolith application (Port `8080`)
+- **postgres**: PostgreSQL 16 database
 
-## Local Development Startup Order
-If running services manually:
-1. Infrastructure: `docker compose up -d postgres zookeeper kafka`
-2. Discovery server: `cbs-discovery-server` (port `8761`)
-3. Config server: `cbs-config-server` (port `8888`)
-4. Core services: auth, customer, account, ledger
-5. Domain services: transaction, payment, loan, deposit, card, notification, interest, fee, fx, reporting
-6. API Gateway: `cbs-api-gateway` (port `8080`)
-
-Example run command from repository root:
-- `mvn -pl <module-name> -am spring-boot:run`
+## Local Development
+If running the application manually:
+1. Start infrastructure: `docker compose up -d postgres`
+2. Run app from root: `mvn -pl cbs-application spring-boot:run`
 
 ## Build
 ```bash
-mvn validate
+mvn clean install
 ```
 
-## Real PostgreSQL Integration Tests (One Command)
-Run all real (Docker-backed) service integration tests with:
+## Integration Tests
+Run real (Docker-backed) PostgreSQL integration tests:
 
 ```bash
-make real-it-tests
+mvn test -P integration-test
 ```
 
-Run infrastructure integration tests (gateway/config/discovery) with:
-
-```bash
-make infra-it-tests
-```
-
-Run both infrastructure + real PostgreSQL service integration tests with:
-
-```bash
-make all-it-tests
-```
-
-This command will:
-- start a temporary PostgreSQL 16 container,
-- create per-service test databases,
-- run each `*PostgresIntegrationTest` class with real DB connections,
-- stop and remove the container when finished.
-
-Optional environment variables:
-- `IT_DB_PORT` (default: `55432`)
-- `IT_DB_USER` (default: `test`)
-- `IT_DB_PASSWORD` (default: `test`)
-- `IT_DB_CONTAINER_NAME` (default: `cbs-it-postgres`)
-- `KEEP_IT_DB_CONTAINER=true` to keep container running after tests.
+This will:
+- Spin up a temporary PostgreSQL container (via Testcontainers or scripts),
+- Run `*PostgresIntegrationTest` classes with real DB connections,
+- Ensure clean teardown.
