@@ -25,3 +25,4 @@ This directory documents architecture and service-boundary decisions for CBS.
 - [ADR-0020 Migration to Java 21 LTS](0020-migration-to-java-21.md)
 - [ADR-0021 Card Spending Limits Enforcement](0021-card-spending-limits-enforcement.md)
 - [ADR-0022 Scheduled Payments and Standing Orders](0022-scheduled-payments.md)
+- [ADR-0023 Loan Amortization Schedule Implementation](0023-loan-amortization.md)
