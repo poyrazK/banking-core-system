@@ -48,7 +48,11 @@ jobs:
           mvn org.owasp:dependency-check-maven:check \
             -DfailBuildOnCVSS=7 \
             -DdataDirectory=~/.dependency-check-data \
-            -DnvdApiKey=${{ secrets.NVD_API_KEY }}
+            -DnvdApiKey=${{ secrets.NVD_API_KEY }} \
+            -DnvdMaxRetryCount=10 \
+            -DnvdApiDelay=5000
+        # If the NVD API is down, this might still fail. 
+        # In a real-world scenario, you might want to use a hosted mirror.
 
       - name: Publish Test Results
         uses: dorny/test-reporter@v1
