@@ -35,8 +35,20 @@ jobs:
       - name: Build & Test
         run: mvn verify -Dtest="!*IntegrationTest,!*PostgresIntegrationTest" -Dsurefire.failIfNoSpecifiedTests=false
 
+      - name: Cache Dependency Check Data
+        uses: actions/cache@v4
+        with:
+          path: ~/.dependency-check-data
+          key: dependency-check-${{ runner.os }}-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            dependency-check-${{ runner.os }}-
+
       - name: Dependency Security Check
-        run: mvn org.owasp:dependency-check-maven:check -DfailBuildOnCVSS=7
+        run: |
+          mvn org.owasp:dependency-check-maven:check \
+            -DfailBuildOnCVSS=7 \
+            -DdataDirectory=~/.dependency-check-data \
+            -DnvdApiKey=${{ secrets.NVD_API_KEY }}
 
       - name: Publish Test Results
         uses: dorny/test-reporter@v1
