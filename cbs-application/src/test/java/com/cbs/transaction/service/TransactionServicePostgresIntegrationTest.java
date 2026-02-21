@@ -58,6 +58,7 @@ class TransactionServicePostgresIntegrationTest {
                 101L,
                 201L,
                 301L,
+                null,
                 TransactionType.TRANSFER,
                 new BigDecimal("250.00"),
                 "TRY",
@@ -79,6 +80,7 @@ class TransactionServicePostgresIntegrationTest {
         CreateTransactionRequest req = new CreateTransactionRequest(
                 102L,
                 202L,
+                null,
                 null,
                 TransactionType.PAYMENT,
                 new BigDecimal("80.00"),
