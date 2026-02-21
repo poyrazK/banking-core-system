@@ -24,3 +24,4 @@ This directory documents architecture and service-boundary decisions for CBS.
 - [ADR-0019 Cross Currency Validation](0019-cross-currency-validation.md)
 - [ADR-0020 Migration to Java 21 LTS](0020-migration-to-java-21.md)
 - [ADR-0021 Card Spending Limits Enforcement](0021-card-spending-limits-enforcement.md)
+- [ADR-0022 Scheduled Payments and Standing Orders](0022-scheduled-payments.md)
