@@ -5,9 +5,12 @@ import com.cbs.loan.dto.CreateLoanRequest;
 import com.cbs.loan.dto.LoanDecisionRequest;
 import com.cbs.loan.dto.LoanRepaymentRequest;
 import com.cbs.loan.dto.LoanResponse;
+import com.cbs.loan.dto.LoanScheduleResponse;
 import com.cbs.loan.model.Loan;
+import com.cbs.loan.model.LoanScheduleEntry;
 import com.cbs.loan.model.LoanStatus;
 import com.cbs.loan.repository.LoanRepository;
+import com.cbs.loan.repository.LoanScheduleRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,9 +22,11 @@ import java.util.List;
 public class LoanService {
 
     private final LoanRepository loanRepository;
+    private final LoanScheduleRepository loanScheduleRepository;
 
-    public LoanService(LoanRepository loanRepository) {
+    public LoanService(LoanRepository loanRepository, LoanScheduleRepository loanScheduleRepository) {
         this.loanRepository = loanRepository;
+        this.loanScheduleRepository = loanScheduleRepository;
     }
 
     @Transactional
@@ -48,8 +53,8 @@ public class LoanService {
                 request.annualInterestRate(),
                 request.termMonths(),
                 request.startDate(),
-                request.maturityDate()
-        );
+                request.maturityDate(),
+                request.amortizationType());
 
         return LoanResponse.from(loanRepository.save(loan));
     }
@@ -57,6 +62,18 @@ public class LoanService {
     @Transactional(readOnly = true)
     public LoanResponse getLoan(Long loanId) {
         return LoanResponse.from(findLoan(loanId));
+    }
+
+    @Transactional(readOnly = true)
+    public LoanScheduleResponse getSchedule(Long loanId) {
+        Loan loan = findLoan(loanId);
+        List<LoanScheduleEntry> entries = loanScheduleRepository.findByLoanIdOrderByInstallmentNumberAsc(loanId);
+
+        if (entries.isEmpty()) {
+            throw new ApiException("LOAN_SCHEDULE_NOT_FOUND", "Amortization schedule not found for loan ID: " + loanId);
+        }
+
+        return LoanScheduleResponse.from(loan, entries);
     }
 
     @Transactional(readOnly = true)
@@ -112,7 +129,20 @@ public class LoanService {
         loan.setStatus(LoanStatus.DISBURSED);
         loan.setOutstandingAmount(loan.getPrincipalAmount());
         loan.setDecisionReason(null);
-        return LoanResponse.from(loanRepository.save(loan));
+        Loan savedLoan = loanRepository.save(loan);
+
+        // Generate and save amortization schedule
+        loanScheduleRepository.deleteByLoanId(loanId);
+        List<LoanScheduleEntry> schedule = AmortizationCalculator.generateSchedule(
+                savedLoan.getId(),
+                savedLoan.getPrincipalAmount(),
+                savedLoan.getAnnualInterestRate(),
+                savedLoan.getTermMonths(),
+                savedLoan.getStartDate(),
+                savedLoan.getAmortizationType());
+        loanScheduleRepository.saveAll(schedule);
+
+        return LoanResponse.from(savedLoan);
     }
 
     @Transactional

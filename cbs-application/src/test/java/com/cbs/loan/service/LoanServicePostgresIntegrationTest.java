@@ -3,6 +3,7 @@ package com.cbs.loan.service;
 import com.cbs.loan.dto.CreateLoanRequest;
 import com.cbs.loan.dto.LoanRepaymentRequest;
 import com.cbs.loan.dto.LoanResponse;
+import com.cbs.loan.model.AmortizationType;
 import com.cbs.loan.model.Loan;
 import com.cbs.loan.model.LoanStatus;
 import com.cbs.loan.model.LoanType;
@@ -30,8 +31,7 @@ class LoanServicePostgresIntegrationTest {
     static void registerDataSource(DynamicPropertyRegistry registry) {
         registry.add("spring.datasource.url", () -> System.getProperty(
                 "it.db.url",
-                "jdbc:postgresql://localhost:55436/cbs_loan_it"
-        ));
+                "jdbc:postgresql://localhost:55436/cbs_loan_it"));
         registry.add("spring.datasource.username", () -> System.getProperty("it.db.username", "test"));
         registry.add("spring.datasource.password", () -> System.getProperty("it.db.password", "test"));
     }
@@ -58,8 +58,8 @@ class LoanServicePostgresIntegrationTest {
                 BigDecimal.valueOf(12.5),
                 12,
                 LocalDate.of(2026, 2, 1),
-                LocalDate.of(2027, 2, 1)
-        ));
+                LocalDate.of(2027, 2, 1),
+                AmortizationType.ANNUITY));
 
         assertEquals("LOAN-001", response.loanNumber());
         assertTrue(loanRepository.existsByLoanNumber("LOAN-001"));
@@ -76,8 +76,8 @@ class LoanServicePostgresIntegrationTest {
                 BigDecimal.valueOf(10.5),
                 6,
                 LocalDate.of(2026, 2, 1),
-                LocalDate.of(2026, 8, 1)
-        ));
+                LocalDate.of(2026, 8, 1),
+                AmortizationType.ANNUITY));
 
         loanService.approveLoan(created.id());
         loanService.disburseLoan(created.id());

@@ -15,10 +15,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 
 @Entity
-@Table(
-        name = "loans",
-        uniqueConstraints = @UniqueConstraint(name = "uk_loans_loan_number", columnNames = "loan_number")
-)
+@Table(name = "loans", uniqueConstraints = @UniqueConstraint(name = "uk_loans_loan_number", columnNames = "loan_number"))
 public class Loan extends AuditableEntity {
 
     @Id
@@ -41,6 +38,10 @@ public class Loan extends AuditableEntity {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 16)
     private LoanStatus status = LoanStatus.APPLIED;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 16)
+    private AmortizationType amortizationType;
 
     @Column(nullable = false, precision = 19, scale = 2)
     private BigDecimal principalAmount;
@@ -66,15 +67,17 @@ public class Loan extends AuditableEntity {
     public Loan() {
     }
 
+    @SuppressWarnings("checkstyle:ParameterNumber")
     public Loan(Long customerId,
-                Long accountId,
-                String loanNumber,
-                LoanType loanType,
-                BigDecimal principalAmount,
-                BigDecimal annualInterestRate,
-                Integer termMonths,
-                LocalDate startDate,
-                LocalDate maturityDate) {
+            Long accountId,
+            String loanNumber,
+            LoanType loanType,
+            BigDecimal principalAmount,
+            BigDecimal annualInterestRate,
+            Integer termMonths,
+            LocalDate startDate,
+            LocalDate maturityDate,
+            AmortizationType amortizationType) {
         this.customerId = customerId;
         this.accountId = accountId;
         this.loanNumber = loanNumber;
@@ -84,6 +87,7 @@ public class Loan extends AuditableEntity {
         this.termMonths = termMonths;
         this.startDate = startDate;
         this.maturityDate = maturityDate;
+        this.amortizationType = amortizationType;
     }
 
     public Long getId() {
@@ -136,6 +140,10 @@ public class Loan extends AuditableEntity {
 
     public String getDecisionReason() {
         return decisionReason;
+    }
+
+    public AmortizationType getAmortizationType() {
+        return amortizationType;
     }
 
     public void setStatus(LoanStatus status) {

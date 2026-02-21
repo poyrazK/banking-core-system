@@ -7,6 +7,7 @@ import com.cbs.loan.dto.CreateLoanRequest;
 import com.cbs.loan.dto.LoanDecisionRequest;
 import com.cbs.loan.dto.LoanRepaymentRequest;
 import com.cbs.loan.dto.LoanResponse;
+import com.cbs.loan.dto.LoanScheduleResponse;
 import com.cbs.loan.model.LoanStatus;
 import com.cbs.loan.service.LoanService;
 import jakarta.validation.Valid;
@@ -79,5 +80,12 @@ public class LoanController {
             @Valid @RequestBody LoanRepaymentRequest request) {
         LoanResponse response = loanService.repayLoan(loanId, request);
         return ResponseEntity.ok(ApiResponse.success("Loan repayment posted", response));
+    }
+
+    @GetMapping("/{loanId}/schedule")
+    public ResponseEntity<ApiResponse<LoanScheduleResponse>> getLoanSchedule(
+            @PathVariable("loanId") Long loanId) {
+        LoanScheduleResponse response = loanService.getSchedule(loanId);
+        return ResponseEntity.ok(ApiResponse.success("Loan schedule retrieved", response));
     }
 }

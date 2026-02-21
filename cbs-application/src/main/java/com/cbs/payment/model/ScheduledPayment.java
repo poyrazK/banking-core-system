@@ -79,30 +79,49 @@ public class ScheduledPayment extends AuditableEntity {
     public ScheduledPayment() {
     }
 
-    public ScheduledPayment(Long customerId,
-            Long sourceAccountId,
-            Long destinationAccountId,
-            BigDecimal amount,
-            String currency,
-            PaymentMethod method,
-            String description,
-            ScheduleFrequency frequency,
-            LocalDate startDate,
-            LocalDate endDate,
-            String reference) {
-        this.customerId = customerId;
-        this.sourceAccountId = sourceAccountId;
-        this.destinationAccountId = destinationAccountId;
-        this.amount = amount;
-        this.currency = currency;
-        this.method = method;
-        this.description = description;
-        this.frequency = frequency;
-        this.startDate = startDate;
-        this.endDate = endDate;
-        this.reference = reference;
-        this.nextExecutionDate = startDate;
-        this.status = ScheduledPaymentStatus.ACTIVE;
+    private ScheduledPayment(Builder builder) {
+        this.customerId = builder.customerId;
+        this.sourceAccountId = builder.sourceAccountId;
+        this.destinationAccountId = builder.destinationAccountId;
+        this.amount = builder.amount;
+        this.currency = builder.currency;
+        this.method = builder.method;
+        this.description = builder.description;
+        this.frequency = builder.frequency;
+        this.startDate = builder.startDate;
+        this.endDate = builder.endDate;
+        this.reference = builder.reference;
+        this.nextExecutionDate = builder.startDate;
+    }
+
+    public static class Builder {
+        private Long customerId;
+        private Long sourceAccountId;
+        private Long destinationAccountId;
+        private BigDecimal amount;
+        private String currency;
+        private PaymentMethod method;
+        private String description;
+        private ScheduleFrequency frequency;
+        private LocalDate startDate;
+        private LocalDate endDate;
+        private String reference;
+
+        public Builder customerId(Long customerId) { this.customerId = customerId; return this; }
+        public Builder sourceAccountId(Long sourceAccountId) { this.sourceAccountId = sourceAccountId; return this; }
+        public Builder destinationAccountId(Long destinationAccountId) { this.destinationAccountId = destinationAccountId; return this; }
+        public Builder amount(BigDecimal amount) { this.amount = amount; return this; }
+        public Builder currency(String currency) { this.currency = currency; return this; }
+        public Builder method(PaymentMethod method) { this.method = method; return this; }
+        public Builder description(String description) { this.description = description; return this; }
+        public Builder frequency(ScheduleFrequency frequency) { this.frequency = frequency; return this; }
+        public Builder startDate(LocalDate startDate) { this.startDate = startDate; return this; }
+        public Builder endDate(LocalDate endDate) { this.endDate = endDate; return this; }
+        public Builder reference(String reference) { this.reference = reference; return this; }
+
+        public ScheduledPayment build() {
+            return new ScheduledPayment(this);
+        }
     }
 
     public Long getId() {

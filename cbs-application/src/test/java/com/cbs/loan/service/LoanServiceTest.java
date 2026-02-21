@@ -6,9 +6,11 @@ import com.cbs.loan.dto.LoanDecisionRequest;
 import com.cbs.loan.dto.LoanRepaymentRequest;
 import com.cbs.loan.dto.LoanResponse;
 import com.cbs.loan.model.Loan;
+import com.cbs.loan.model.AmortizationType;
 import com.cbs.loan.model.LoanStatus;
 import com.cbs.loan.model.LoanType;
 import com.cbs.loan.repository.LoanRepository;
+import com.cbs.loan.repository.LoanScheduleRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -20,9 +22,17 @@ import java.time.LocalDate;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.times;
+
+import java.util.List;
+import com.cbs.loan.dto.LoanScheduleResponse;
+import com.cbs.loan.model.LoanScheduleEntry;
 
 @ExtendWith(MockitoExtension.class)
 class LoanServiceTest {
@@ -30,11 +40,14 @@ class LoanServiceTest {
     @Mock
     private LoanRepository loanRepository;
 
+    @Mock
+    private LoanScheduleRepository loanScheduleRepository;
+
     private LoanService loanService;
 
     @BeforeEach
     void setUp() {
-        loanService = new LoanService(loanRepository);
+        loanService = new LoanService(loanRepository, loanScheduleRepository);
     }
 
     @Test
@@ -48,8 +61,8 @@ class LoanServiceTest {
                 BigDecimal.valueOf(12.5),
                 12,
                 LocalDate.of(2026, 2, 1),
-                LocalDate.of(2027, 2, 1)
-        );
+                LocalDate.of(2027, 2, 1),
+                AmortizationType.ANNUITY);
         when(loanRepository.existsByLoanNumber("LOAN-001")).thenReturn(false);
         when(loanRepository.save(any(Loan.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
@@ -57,6 +70,31 @@ class LoanServiceTest {
 
         assertEquals("LOAN-001", response.loanNumber());
         assertEquals(LoanStatus.APPLIED, response.status());
+    }
+
+    @Test
+    void getSchedule_returnsResponseWhenFound() {
+        Loan loan = createLoanWithStatus(LoanStatus.DISBURSED);
+        when(loanRepository.findById(1L)).thenReturn(Optional.of(loan));
+
+        LoanScheduleEntry entry = new LoanScheduleEntry(1L, 1, LocalDate.of(2026, 3, 1), BigDecimal.valueOf(100),
+                BigDecimal.valueOf(10), BigDecimal.valueOf(110), BigDecimal.ZERO);
+        when(loanScheduleRepository.findByLoanIdOrderByInstallmentNumberAsc(1L)).thenReturn(List.of(entry));
+
+        LoanScheduleResponse response = loanService.getSchedule(1L);
+
+        assertNull(response.loanId());
+        assertEquals(1, response.schedule().size());
+    }
+
+    @Test
+    void getSchedule_throwsWhenNotFound() {
+        Loan loan = createLoanWithStatus(LoanStatus.DISBURSED);
+        when(loanRepository.findById(1L)).thenReturn(Optional.of(loan));
+        when(loanScheduleRepository.findByLoanIdOrderByInstallmentNumberAsc(1L)).thenReturn(List.of());
+
+        ApiException exception = assertThrows(ApiException.class, () -> loanService.getSchedule(1L));
+        assertEquals("LOAN_SCHEDULE_NOT_FOUND", exception.getErrorCode());
     }
 
     @Test
@@ -70,8 +108,8 @@ class LoanServiceTest {
                 BigDecimal.valueOf(12.5),
                 12,
                 LocalDate.of(2026, 2, 1),
-                LocalDate.of(2027, 2, 1)
-        );
+                LocalDate.of(2027, 2, 1),
+                AmortizationType.ANNUITY);
         when(loanRepository.existsByLoanNumber("LOAN-001")).thenReturn(true);
 
         ApiException exception = assertThrows(ApiException.class, () -> loanService.createLoan(request));
@@ -94,11 +132,16 @@ class LoanServiceTest {
         Loan loan = createLoanWithStatus(LoanStatus.APPROVED);
         when(loanRepository.findById(12L)).thenReturn(Optional.of(loan));
         when(loanRepository.save(any(Loan.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(loanScheduleRepository.saveAll(any())).thenAnswer(invocation -> invocation.getArgument(0));
 
         LoanResponse response = loanService.disburseLoan(12L);
 
         assertEquals(LoanStatus.DISBURSED, response.status());
         assertEquals(BigDecimal.valueOf(10000), response.outstandingAmount());
+
+        verify(loanScheduleRepository, times(1)).saveAll(argThat((List<LoanScheduleEntry> schedule) -> {
+            return schedule.size() == loan.getTermMonths() && schedule.get(0).getInstallmentNumber() == 1;
+        }));
     }
 
     @Test
@@ -136,8 +179,8 @@ class LoanServiceTest {
                 BigDecimal.valueOf(12.5),
                 12,
                 LocalDate.of(2026, 2, 1),
-                LocalDate.of(2027, 2, 1)
-        );
+                LocalDate.of(2027, 2, 1),
+                AmortizationType.ANNUITY);
         loan.setStatus(status);
         return loan;
     }
