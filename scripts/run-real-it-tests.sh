@@ -96,7 +96,7 @@ for test_class in "${TEST_CLASSES[@]}"; do
   db_name="cbs_${domain}_it"
   echo
   echo "=== Running ${domain} / ${test_class} ==="
-  mvn -pl :cbs-application test \
+  mvn -pl :cbs-application -am test \
     -Dtest="$test_class" \
     -Dsurefire.failIfNoSpecifiedTests=false \
     -Dit.db.url="jdbc:postgresql://localhost:${IT_DB_PORT}/${db_name}" \

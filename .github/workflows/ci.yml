@@ -8,7 +8,7 @@ on:
 
 concurrency:
   group: ci-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
 
 jobs:
   lint:
@@ -38,7 +38,7 @@ jobs:
       - name: Cache Dependency Check Data
         uses: actions/cache@v4
         with:
-          path: ~/.dependency-check-data
+          path: ~/.m2/repository/org/owasp/dependency-check-data/
           key: dependency-check-${{ runner.os }}-${{ hashFiles('**/pom.xml') }}
           restore-keys: |
             dependency-check-${{ runner.os }}-
@@ -46,16 +46,16 @@ jobs:
       - name: Dependency Security Check
         run: |
           # Attempt to update the vulnerability database, but don't fail the build if NVD API is down
-          mvn org.owasp:dependency-check-maven:update-only \
-            -DdataDirectory=~/.dependency-check-data \
+          mvn org.owasp:dependency-check-maven:12.1.0:update-only \
+            -DdataDirectory=~/.m2/repository/org/owasp/dependency-check-data/ \
             -DnvdApiKey=${{ secrets.NVD_API_KEY }} \
             -DnvdMaxRetryCount=5 || echo "NVD Update failed, using cached data if available"
           
           # Perform the actual scan using the current database (cached or just updated)
-          mvn org.owasp:dependency-check-maven:check \
+          mvn org.owasp:dependency-check-maven:12.1.0:check \
             -DautoUpdate=false \
             -DfailBuildOnCVSS=7 \
-            -DdataDirectory=~/.dependency-check-data
+            -DdataDirectory=~/.m2/repository/org/owasp/dependency-check-data/
 
       - name: Publish Test Results
         uses: dorny/test-reporter@v1
