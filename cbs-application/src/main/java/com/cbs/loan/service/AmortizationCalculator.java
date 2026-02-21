@@ -27,6 +27,13 @@ public class AmortizationCalculator {
             LocalDate startDate,
             AmortizationType type) {
 
+        if (termMonths <= 0) {
+            throw new IllegalArgumentException("termMonths must be greater than 0");
+        }
+        if (principal == null || principal.compareTo(BigDecimal.ZERO) <= 0) {
+            throw new IllegalArgumentException("principal must be non-null and greater than 0");
+        }
+
         return switch (type) {
             case ANNUITY -> generateAnnuitySchedule(loanId, principal, annualRate, termMonths, startDate);
             case FLAT -> generateFlatSchedule(loanId, principal, annualRate, termMonths, startDate);
@@ -40,14 +47,19 @@ public class AmortizationCalculator {
 
         List<LoanScheduleEntry> schedule = new ArrayList<>();
         BigDecimal monthlyRate = annualRate.divide(BigDecimal.valueOf(1200), 10, ROUNDING_MODE);
-        MathContext mc = new MathContext(15, ROUNDING_MODE);
 
-        // PMT = P * [r(1+r)^n] / [(1+r)^n – 1]
-        BigDecimal ratePlusOnePowN = monthlyRate.add(BigDecimal.ONE).pow(termMonths, mc);
-        BigDecimal numerator = principal.multiply(monthlyRate).multiply(ratePlusOnePowN);
-        BigDecimal denominator = ratePlusOnePowN.subtract(BigDecimal.ONE);
+        BigDecimal monthlyPayment;
+        if (monthlyRate.compareTo(BigDecimal.ZERO) == 0) {
+            monthlyPayment = principal.divide(BigDecimal.valueOf(termMonths), SCALE, ROUNDING_MODE);
+        } else {
+            MathContext mc = new MathContext(15, ROUNDING_MODE);
+            // PMT = P * [r(1+r)^n] / [(1+r)^n – 1]
+            BigDecimal ratePlusOnePowN = monthlyRate.add(BigDecimal.ONE).pow(termMonths, mc);
+            BigDecimal numerator = principal.multiply(monthlyRate).multiply(ratePlusOnePowN);
+            BigDecimal denominator = ratePlusOnePowN.subtract(BigDecimal.ONE);
+            monthlyPayment = numerator.divide(denominator, SCALE, ROUNDING_MODE);
+        }
 
-        BigDecimal monthlyPayment = numerator.divide(denominator, SCALE, ROUNDING_MODE);
         BigDecimal remainingBalance = principal;
 
         for (int i = 1; i <= termMonths; i++) {
