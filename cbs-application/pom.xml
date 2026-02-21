@@ -77,7 +77,12 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <configuration>
-                    <argLine>-Dnet.bytebuddy.experimental=true</argLine>
+                    <argLine>@{argLine} -Dnet.bytebuddy.experimental=true</argLine>
+                    <systemPropertyVariables>
+                        <it.db.url>${it.db.url}</it.db.url>
+                        <it.db.username>${it.db.username}</it.db.username>
+                        <it.db.password>${it.db.password}</it.db.password>
+                    </systemPropertyVariables>
                 </configuration>
             </plugin>
             <plugin>

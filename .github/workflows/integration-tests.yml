@@ -11,6 +11,11 @@ jobs:
   integration-tests:
     name: IT - ${{ matrix.domain }}
     runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      actions: read
+      checks: write
     strategy:
       fail-fast: false
       matrix:
@@ -85,3 +90,11 @@ jobs:
             -Dit.db.username="test" \
             -Dit.db.password="test" \
             -Dtest="com.cbs.${{ matrix.domain }}.**.*IntegrationTest"
+
+      - name: Publish IT Results
+        uses: dorny/test-reporter@v2
+        if: always()
+        with:
+          name: IT - ${{ matrix.domain }}
+          path: '**/surefire-reports/TEST-*.xml'
+          reporter: java-junit
