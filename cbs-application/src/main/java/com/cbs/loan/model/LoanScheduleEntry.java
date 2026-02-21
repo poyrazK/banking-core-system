@@ -6,13 +6,14 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Index;
 import jakarta.persistence.Table;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
 @Entity
-@Table(name = "loan_schedule_entries")
+@Table(name = "loan_schedule_entries", indexes = @Index(name = "idx_loan_schedule_loan_id", columnList = "loanId"))
 public class LoanScheduleEntry extends AuditableEntity {
 
     @Id

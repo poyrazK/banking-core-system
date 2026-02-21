@@ -79,6 +79,7 @@ public class ScheduledPayment extends AuditableEntity {
     public ScheduledPayment() {
     }
 
+    @SuppressWarnings("checkstyle:ParameterNumber")
     public ScheduledPayment(Long customerId,
             Long sourceAccountId,
             Long destinationAccountId,

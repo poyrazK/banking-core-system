@@ -23,11 +23,18 @@ We will implement an automated Loan Amortization Engine.
 - **Rounding Strategy**: `RoundingMode.HALF_UP`.
 - **Last Installment Adjustment**: The final installment amount is adjusted to absorb any rounding remainders, ensuring the loan balance reaches exactly zero.
 
+## Alternatives Considered
+- **On-the-fly computation**: Rejected because audit trails require fixed historical schedules that don't change if business rules evolve after disbursement.
+- **Storing schedule on the Loan entity**: Rejected due to JSON bloat and difficulty in querying specific installments (e.g., "all due payments today").
+- **External amortization library**: Rejected to keep the core banking math transparent, manageable, and free of external dependency risks.
+
 ## Consequences
 - **Positive**: Improved transparency for customers.
 - **Positive**: Consistent interest accrual calculation across the system.
 - **Neutral**: Increased storage requirement due to installment records (e.g., 360 rows for a 30-year mortgage).
 - **Negative**: The disbursement operation is now slightly heavier as it involves batch insertion of schedule rows.
+- **Transactional Atomicity**: Disbursement status update and schedule persistence are tied to a single transactional boundary. Failure in generation triggers a rollback of the disbursement.
+- **Idempotency**: Retrying disbursement is safe as `LoanScheduleRepository.deleteByLoanId` performs a bulk deletion of existing rows before recreation, preventing duplicate installments on retry.
 
 ## Verification
 - Unit tests verify math accuracy for all three amortization types.

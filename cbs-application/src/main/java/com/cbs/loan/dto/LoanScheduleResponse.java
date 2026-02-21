@@ -2,6 +2,7 @@ package com.cbs.loan.dto;
 
 import com.cbs.loan.model.AmortizationType;
 import com.cbs.loan.model.Loan;
+import com.cbs.loan.model.LoanScheduleEntry;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -27,14 +28,13 @@ public record LoanScheduleResponse(
             boolean paid) {
     }
 
-    public static LoanScheduleResponse from(Loan loan, AmortizationType type,
-            List<com.cbs.loan.model.LoanScheduleEntry> entries) {
+    public static LoanScheduleResponse from(Loan loan, AmortizationType type, List<LoanScheduleEntry> entries) {
         BigDecimal totalInterest = entries.stream()
-                .map(com.cbs.loan.model.LoanScheduleEntry::getInterestAmount)
+                .map(LoanScheduleEntry::getInterestAmount)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
         BigDecimal totalPayment = entries.stream()
-                .map(com.cbs.loan.model.LoanScheduleEntry::getTotalPayment)
+                .map(LoanScheduleEntry::getTotalPayment)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
         List<InstallmentEntry> installments = entries.stream()

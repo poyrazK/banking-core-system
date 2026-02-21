@@ -1,5 +1,6 @@
 package com.cbs.loan.dto;
 
+import com.cbs.loan.model.AmortizationType;
 import com.cbs.loan.model.Loan;
 import com.cbs.loan.model.LoanStatus;
 import com.cbs.loan.model.LoanType;
@@ -20,8 +21,8 @@ public record LoanResponse(
         Integer termMonths,
         LocalDate startDate,
         LocalDate maturityDate,
-        String decisionReason
-) {
+        String decisionReason,
+        AmortizationType amortizationType) {
     public static LoanResponse from(Loan loan) {
         return new LoanResponse(
                 loan.getId(),
@@ -36,7 +37,7 @@ public record LoanResponse(
                 loan.getTermMonths(),
                 loan.getStartDate(),
                 loan.getMaturityDate(),
-                loan.getDecisionReason()
-        );
+                loan.getDecisionReason(),
+                loan.getAmortizationType());
     }
 }

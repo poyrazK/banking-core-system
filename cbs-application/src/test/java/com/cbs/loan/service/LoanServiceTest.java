@@ -6,6 +6,7 @@ import com.cbs.loan.dto.LoanDecisionRequest;
 import com.cbs.loan.dto.LoanRepaymentRequest;
 import com.cbs.loan.dto.LoanResponse;
 import com.cbs.loan.model.Loan;
+import com.cbs.loan.model.AmortizationType;
 import com.cbs.loan.model.LoanStatus;
 import com.cbs.loan.model.LoanType;
 import com.cbs.loan.repository.LoanRepository;
@@ -52,7 +53,8 @@ class LoanServiceTest {
                 BigDecimal.valueOf(12.5),
                 12,
                 LocalDate.of(2026, 2, 1),
-                LocalDate.of(2027, 2, 1));
+                LocalDate.of(2027, 2, 1),
+                AmortizationType.ANNUITY);
         when(loanRepository.existsByLoanNumber("LOAN-001")).thenReturn(false);
         when(loanRepository.save(any(Loan.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
@@ -73,7 +75,8 @@ class LoanServiceTest {
                 BigDecimal.valueOf(12.5),
                 12,
                 LocalDate.of(2026, 2, 1),
-                LocalDate.of(2027, 2, 1));
+                LocalDate.of(2027, 2, 1),
+                AmortizationType.ANNUITY);
         when(loanRepository.existsByLoanNumber("LOAN-001")).thenReturn(true);
 
         ApiException exception = assertThrows(ApiException.class, () -> loanService.createLoan(request));
@@ -139,7 +142,8 @@ class LoanServiceTest {
                 BigDecimal.valueOf(12.5),
                 12,
                 LocalDate.of(2026, 2, 1),
-                LocalDate.of(2027, 2, 1));
+                LocalDate.of(2027, 2, 1),
+                AmortizationType.ANNUITY);
         loan.setStatus(status);
         return loan;
     }

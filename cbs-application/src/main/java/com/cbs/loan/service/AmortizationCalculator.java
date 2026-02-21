@@ -4,6 +4,7 @@ import com.cbs.loan.model.AmortizationType;
 import com.cbs.loan.model.LoanScheduleEntry;
 
 import java.math.BigDecimal;
+import java.math.MathContext;
 import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -39,9 +40,10 @@ public class AmortizationCalculator {
 
         List<LoanScheduleEntry> schedule = new ArrayList<>();
         BigDecimal monthlyRate = annualRate.divide(BigDecimal.valueOf(1200), 10, ROUNDING_MODE);
+        MathContext mc = new MathContext(15, ROUNDING_MODE);
 
         // PMT = P * [r(1+r)^n] / [(1+r)^n – 1]
-        BigDecimal ratePlusOnePowN = monthlyRate.add(BigDecimal.ONE).pow(termMonths);
+        BigDecimal ratePlusOnePowN = monthlyRate.add(BigDecimal.ONE).pow(termMonths, mc);
         BigDecimal numerator = principal.multiply(monthlyRate).multiply(ratePlusOnePowN);
         BigDecimal denominator = ratePlusOnePowN.subtract(BigDecimal.ONE);
 
@@ -50,18 +52,25 @@ public class AmortizationCalculator {
 
         for (int i = 1; i <= termMonths; i++) {
             BigDecimal interest = remainingBalance.multiply(monthlyRate).setScale(SCALE, ROUNDING_MODE);
+
+            // Guard interest against negative values
+            if (interest.compareTo(BigDecimal.ZERO) < 0) {
+                interest = BigDecimal.ZERO.setScale(SCALE, ROUNDING_MODE);
+            }
+
             BigDecimal principalPaid = monthlyPayment.subtract(interest);
+            BigDecimal paymentForPeriod = monthlyPayment;
 
             // Adjust last installment for rounding remainders
             if (i == termMonths) {
                 principalPaid = remainingBalance;
-                interest = monthlyPayment.subtract(principalPaid);
+                paymentForPeriod = principalPaid.add(interest);
             }
 
             remainingBalance = remainingBalance.subtract(principalPaid);
 
             schedule.add(new LoanScheduleEntry(
-                    loanId, i, startDate.plusMonths(i), principalPaid, interest, monthlyPayment, remainingBalance));
+                    loanId, i, startDate.plusMonths(i), principalPaid, interest, paymentForPeriod, remainingBalance));
         }
 
         return schedule;
@@ -89,6 +98,10 @@ public class AmortizationCalculator {
                 interest = totalInterest.subtract(monthlyInterest.multiply(BigDecimal.valueOf((long) termMonths - 1)));
             }
 
+            if (interest.compareTo(BigDecimal.ZERO) < 0) {
+                interest = BigDecimal.ZERO.setScale(SCALE, ROUNDING_MODE);
+            }
+
             remainingBalance = remainingBalance.subtract(p);
 
             schedule.add(new LoanScheduleEntry(
@@ -114,6 +127,10 @@ public class AmortizationCalculator {
             }
 
             BigDecimal interest = remainingBalance.multiply(monthlyRate).setScale(SCALE, ROUNDING_MODE);
+            if (interest.compareTo(BigDecimal.ZERO) < 0) {
+                interest = BigDecimal.ZERO.setScale(SCALE, ROUNDING_MODE);
+            }
+
             remainingBalance = remainingBalance.subtract(p);
 
             schedule.add(new LoanScheduleEntry(

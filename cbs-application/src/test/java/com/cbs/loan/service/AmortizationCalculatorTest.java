@@ -70,6 +70,15 @@ class AmortizationCalculatorTest {
                 .map(LoanScheduleEntry::getInterestAmount)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
         assertEquals(new BigDecimal("1200.00"), totalInterest);
+
+        // Sum principal amounts and assert equals original principal
+        BigDecimal totalPrincipal = schedule.stream()
+                .map(LoanScheduleEntry::getPrincipalAmount)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        assertEquals(principal.setScale(2), totalPrincipal);
+
+        // Last remaining balance should be zero
+        assertEquals(BigDecimal.ZERO.setScale(2), schedule.get(schedule.size() - 1).getRemainingBalance());
     }
 
     @Test
@@ -91,5 +100,14 @@ class AmortizationCalculatorTest {
         assertEquals(new BigDecimal("90.00"), schedule.get(1).getInterestAmount());
 
         assertTrue(schedule.get(1).getTotalPayment().compareTo(schedule.get(0).getTotalPayment()) < 0);
+
+        // Sum principal amounts and assert equals original principal
+        BigDecimal totalPrincipal = schedule.stream()
+                .map(LoanScheduleEntry::getPrincipalAmount)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        assertEquals(principal.setScale(2), totalPrincipal);
+
+        // Last remaining balance should be zero
+        assertEquals(BigDecimal.ZERO.setScale(2), schedule.get(schedule.size() - 1).getRemainingBalance());
     }
 }

@@ -6,7 +6,6 @@ import com.cbs.loan.dto.LoanDecisionRequest;
 import com.cbs.loan.dto.LoanRepaymentRequest;
 import com.cbs.loan.dto.LoanResponse;
 import com.cbs.loan.dto.LoanScheduleResponse;
-import com.cbs.loan.model.AmortizationType;
 import com.cbs.loan.model.Loan;
 import com.cbs.loan.model.LoanScheduleEntry;
 import com.cbs.loan.model.LoanStatus;
@@ -54,7 +53,8 @@ public class LoanService {
                 request.annualInterestRate(),
                 request.termMonths(),
                 request.startDate(),
-                request.maturityDate());
+                request.maturityDate(),
+                request.amortizationType());
 
         return LoanResponse.from(loanRepository.save(loan));
     }
@@ -69,8 +69,11 @@ public class LoanService {
         Loan loan = findLoan(loanId);
         List<LoanScheduleEntry> entries = loanScheduleRepository.findByLoanIdOrderByInstallmentNumberAsc(loanId);
 
-        // Default to ANNUITY for now as we don't store the type in Loan yet
-        return LoanScheduleResponse.from(loan, AmortizationType.ANNUITY, entries);
+        if (entries.isEmpty()) {
+            throw new ApiException("LOAN_SCHEDULE_NOT_FOUND", "Amortization schedule not found for loan ID: " + loanId);
+        }
+
+        return LoanScheduleResponse.from(loan, loan.getAmortizationType(), entries);
     }
 
     @Transactional(readOnly = true)
@@ -135,7 +138,7 @@ public class LoanService {
                 loan.getAnnualInterestRate(),
                 loan.getTermMonths(),
                 loan.getStartDate(),
-                AmortizationType.ANNUITY);
+                loan.getAmortizationType());
         loanScheduleRepository.saveAll(schedule);
 
         return LoanResponse.from(savedLoan);
