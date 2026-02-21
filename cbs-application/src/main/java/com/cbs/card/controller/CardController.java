@@ -3,9 +3,11 @@ package com.cbs.card.controller;
 import com.cbs.card.dto.CardResponse;
 import com.cbs.card.dto.CardStatusReasonRequest;
 import com.cbs.card.dto.CreateCardRequest;
+import com.cbs.card.dto.SpendingLimitResponse;
 import com.cbs.card.dto.UpdateCardLimitRequest;
 import com.cbs.card.model.CardStatus;
 import com.cbs.card.service.CardService;
+import com.cbs.card.service.CardSpendingService;
 import com.cbs.common.api.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -27,9 +29,11 @@ import java.util.List;
 public class CardController {
 
     private final CardService cardService;
+    private final CardSpendingService cardSpendingService;
 
-    public CardController(CardService cardService) {
+    public CardController(CardService cardService, CardSpendingService cardSpendingService) {
         this.cardService = cardService;
+        this.cardSpendingService = cardSpendingService;
     }
 
     @PostMapping
@@ -89,5 +93,12 @@ public class CardController {
             @Valid @RequestBody CardStatusReasonRequest request) {
         CardResponse response = cardService.closeCard(cardId, request);
         return ResponseEntity.ok(ApiResponse.success("Card closed", response));
+    }
+
+    @GetMapping("/{cardId}/spending")
+    public ResponseEntity<ApiResponse<SpendingLimitResponse>> getSpending(
+            @PathVariable("cardId") Long cardId) {
+        SpendingLimitResponse response = cardSpendingService.getSpendingStatus(cardId);
+        return ResponseEntity.ok(ApiResponse.success("Spending status retrieved", response));
     }
 }
