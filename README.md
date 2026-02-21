@@ -1,6 +1,6 @@
 # Core Banking System (CBS)
 
-Microservices-based Core Banking System built with Java 17, Spring Boot, Spring Cloud, PostgreSQL, and Kafka.
+Microservices-based Core Banking System built with Java 21 LTS, Spring Boot, Spring Cloud, PostgreSQL, and Kafka.
 
 ## Modules (Scaffold)
 - `cbs-common`
