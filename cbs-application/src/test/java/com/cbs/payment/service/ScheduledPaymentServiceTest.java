@@ -59,10 +59,13 @@ class ScheduledPaymentServiceTest {
 
     @Test
     void executeScheduledPayments_processesDuePayments() {
-        ScheduledPayment payment = new ScheduledPayment(
-                1L, 101L, 201L, new BigDecimal("100.00"), "TRY",
-                PaymentMethod.BANK_TRANSFER, "Rent", ScheduleFrequency.MONTHLY,
-                LocalDate.now().minusDays(1), null, "SCH-REF-1");
+        ScheduledPayment payment = new ScheduledPayment.Builder()
+                .customerId(1L).sourceAccountId(101L).destinationAccountId(201L)
+                .amount(new BigDecimal("100.00")).currency("TRY")
+                .method(PaymentMethod.BANK_TRANSFER).description("Rent")
+                .frequency(ScheduleFrequency.MONTHLY)
+                .startDate(LocalDate.now().minusDays(1)).endDate(null).reference("SCH-REF-1")
+                .build();
         // nextExecutionDate is startDate by default in constructor, but let's be
         // explicit
         payment.setNextExecutionDate(LocalDate.now().minusDays(1));
@@ -85,10 +88,13 @@ class ScheduledPaymentServiceTest {
     @Test
     void executeScheduledPayments_completesAfterEndDate() {
         LocalDate yesterday = LocalDate.now().minusDays(1);
-        ScheduledPayment payment = new ScheduledPayment(
-                1L, 101L, 201L, new BigDecimal("100.00"), "TRY",
-                PaymentMethod.BANK_TRANSFER, "Limited Pay", ScheduleFrequency.DAILY,
-                yesterday, yesterday, "SCH-REF-2");
+        ScheduledPayment payment = new ScheduledPayment.Builder()
+                .customerId(1L).sourceAccountId(101L).destinationAccountId(201L)
+                .amount(new BigDecimal("100.00")).currency("TRY")
+                .method(PaymentMethod.BANK_TRANSFER).description("Limited Pay")
+                .frequency(ScheduleFrequency.DAILY)
+                .startDate(yesterday).endDate(yesterday).reference("SCH-REF-2")
+                .build();
         payment.setNextExecutionDate(yesterday);
 
         when(scheduledPaymentRepository.findByNextExecutionDateLessThanEqualAndStatus(any(),
@@ -103,10 +109,13 @@ class ScheduledPaymentServiceTest {
 
     @Test
     void executeScheduledPayments_autoPausesAfterFailures() {
-        ScheduledPayment payment = new ScheduledPayment(
-                1L, 101L, 201L, new BigDecimal("100.00"), "TRY",
-                PaymentMethod.BANK_TRANSFER, "Fail Test", ScheduleFrequency.DAILY,
-                LocalDate.now(), null, "SCH-REF-FAIL");
+        ScheduledPayment payment = new ScheduledPayment.Builder()
+                .customerId(1L).sourceAccountId(101L).destinationAccountId(201L)
+                .amount(new BigDecimal("100.00")).currency("TRY")
+                .method(PaymentMethod.BANK_TRANSFER).description("Fail Test")
+                .frequency(ScheduleFrequency.DAILY)
+                .startDate(LocalDate.now()).endDate(null).reference("SCH-REF-FAIL")
+                .build();
         payment.setFailureCount(2);
 
         when(scheduledPaymentRepository.findByNextExecutionDateLessThanEqualAndStatus(any(),
@@ -124,10 +133,13 @@ class ScheduledPaymentServiceTest {
 
     @Test
     void pauseAndResume_updatesStatus() {
-        ScheduledPayment payment = new ScheduledPayment(
-                1L, 101L, 201L, new BigDecimal("100.00"), "TRY",
-                PaymentMethod.BANK_TRANSFER, "Status Test", ScheduleFrequency.MONTHLY,
-                LocalDate.now().plusDays(1), null, "SCH-REF-STATUS");
+        ScheduledPayment payment = new ScheduledPayment.Builder()
+                .customerId(1L).sourceAccountId(101L).destinationAccountId(201L)
+                .amount(new BigDecimal("100.00")).currency("TRY")
+                .method(PaymentMethod.BANK_TRANSFER).description("Status Test")
+                .frequency(ScheduleFrequency.MONTHLY)
+                .startDate(LocalDate.now().plusDays(1)).endDate(null).reference("SCH-REF-STATUS")
+                .build();
         payment.setStatus(ScheduledPaymentStatus.ACTIVE);
         when(scheduledPaymentRepository.findById(1L)).thenReturn(Optional.of(payment));
         when(scheduledPaymentRepository.save(any())).thenAnswer(i -> i.getArguments()[0]);

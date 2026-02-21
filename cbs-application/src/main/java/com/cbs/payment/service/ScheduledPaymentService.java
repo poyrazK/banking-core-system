@@ -45,18 +45,19 @@ public class ScheduledPaymentService {
             throw new ApiException("SCHEDULED_PAYMENT_REFERENCE_EXISTS", "Reference already exists");
         }
 
-        ScheduledPayment scheduledPayment = new ScheduledPayment(
-                request.customerId(),
-                request.sourceAccountId(),
-                request.destinationAccountId(),
-                request.amount(),
-                request.currency().trim().toUpperCase(),
-                request.method(),
-                request.description().trim(),
-                request.frequency(),
-                request.startDate(),
-                request.endDate(),
-                reference);
+        ScheduledPayment scheduledPayment = new ScheduledPayment.Builder()
+                .customerId(request.customerId())
+                .sourceAccountId(request.sourceAccountId())
+                .destinationAccountId(request.destinationAccountId())
+                .amount(request.amount())
+                .currency(request.currency().trim().toUpperCase())
+                .method(request.method())
+                .description(request.description().trim())
+                .frequency(request.frequency())
+                .startDate(request.startDate())
+                .endDate(request.endDate())
+                .reference(reference)
+                .build();
 
         return ScheduledPaymentResponse.from(scheduledPaymentRepository.save(scheduledPayment));
     }
