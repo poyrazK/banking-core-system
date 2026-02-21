@@ -80,4 +80,11 @@ public class LoanController {
         LoanResponse response = loanService.repayLoan(loanId, request);
         return ResponseEntity.ok(ApiResponse.success("Loan repayment posted", response));
     }
+
+    @GetMapping("/{loanId}/schedule")
+    public ResponseEntity<ApiResponse<com.cbs.loan.dto.LoanScheduleResponse>> getLoanSchedule(
+            @PathVariable("loanId") Long loanId) {
+        com.cbs.loan.dto.LoanScheduleResponse response = loanService.getSchedule(loanId);
+        return ResponseEntity.ok(ApiResponse.success("Loan schedule retrieved", response));
+    }
 }
