@@ -45,14 +45,17 @@ jobs:
 
       - name: Dependency Security Check
         run: |
-          mvn org.owasp:dependency-check-maven:check \
-            -DfailBuildOnCVSS=7 \
+          # Attempt to update the vulnerability database, but don't fail the build if NVD API is down
+          mvn org.owasp:dependency-check-maven:update-only \
             -DdataDirectory=~/.dependency-check-data \
             -DnvdApiKey=${{ secrets.NVD_API_KEY }} \
-            -DnvdMaxRetryCount=10 \
-            -DnvdApiDelay=5000
-        # If the NVD API is down, this might still fail. 
-        # In a real-world scenario, you might want to use a hosted mirror.
+            -DnvdMaxRetryCount=5 || echo "NVD Update failed, using cached data if available"
+          
+          # Perform the actual scan using the current database (cached or just updated)
+          mvn org.owasp:dependency-check-maven:check \
+            -DautoUpdate=false \
+            -DfailBuildOnCVSS=7 \
+            -DdataDirectory=~/.dependency-check-data
 
       - name: Publish Test Results
         uses: dorny/test-reporter@v1
