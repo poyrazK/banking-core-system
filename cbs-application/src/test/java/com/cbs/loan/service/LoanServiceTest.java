@@ -9,6 +9,7 @@ import com.cbs.loan.model.Loan;
 import com.cbs.loan.model.LoanStatus;
 import com.cbs.loan.model.LoanType;
 import com.cbs.loan.repository.LoanRepository;
+import com.cbs.loan.repository.LoanScheduleRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -30,11 +31,14 @@ class LoanServiceTest {
     @Mock
     private LoanRepository loanRepository;
 
+    @Mock
+    private LoanScheduleRepository loanScheduleRepository;
+
     private LoanService loanService;
 
     @BeforeEach
     void setUp() {
-        loanService = new LoanService(loanRepository);
+        loanService = new LoanService(loanRepository, loanScheduleRepository);
     }
 
     @Test
@@ -48,8 +52,7 @@ class LoanServiceTest {
                 BigDecimal.valueOf(12.5),
                 12,
                 LocalDate.of(2026, 2, 1),
-                LocalDate.of(2027, 2, 1)
-        );
+                LocalDate.of(2027, 2, 1));
         when(loanRepository.existsByLoanNumber("LOAN-001")).thenReturn(false);
         when(loanRepository.save(any(Loan.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
@@ -70,8 +73,7 @@ class LoanServiceTest {
                 BigDecimal.valueOf(12.5),
                 12,
                 LocalDate.of(2026, 2, 1),
-                LocalDate.of(2027, 2, 1)
-        );
+                LocalDate.of(2027, 2, 1));
         when(loanRepository.existsByLoanNumber("LOAN-001")).thenReturn(true);
 
         ApiException exception = assertThrows(ApiException.class, () -> loanService.createLoan(request));
@@ -94,6 +96,7 @@ class LoanServiceTest {
         Loan loan = createLoanWithStatus(LoanStatus.APPROVED);
         when(loanRepository.findById(12L)).thenReturn(Optional.of(loan));
         when(loanRepository.save(any(Loan.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(loanScheduleRepository.saveAll(any())).thenAnswer(invocation -> invocation.getArgument(0));
 
         LoanResponse response = loanService.disburseLoan(12L);
 
@@ -136,8 +139,7 @@ class LoanServiceTest {
                 BigDecimal.valueOf(12.5),
                 12,
                 LocalDate.of(2026, 2, 1),
-                LocalDate.of(2027, 2, 1)
-        );
+                LocalDate.of(2027, 2, 1));
         loan.setStatus(status);
         return loan;
     }
