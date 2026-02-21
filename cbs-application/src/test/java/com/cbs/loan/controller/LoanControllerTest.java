@@ -2,7 +2,7 @@ package com.cbs.loan.controller;
 
 import com.cbs.common.exception.ApiException;
 import com.cbs.loan.dto.LoanResponse;
-import com.cbs.loan.exception.LoanExceptionHandler;
+import com.cbs.common.exception.GlobalExceptionHandler;
 import com.cbs.loan.model.AmortizationType;
 import com.cbs.loan.model.LoanStatus;
 import com.cbs.loan.model.LoanType;
@@ -31,7 +31,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc(addFilters = false)
 @WebMvcTest(LoanController.class)
-@Import(LoanExceptionHandler.class)
+@Import(GlobalExceptionHandler.class)
 class LoanControllerTest {
         @MockBean
         private com.cbs.auth.service.JwtService jwtService;
@@ -144,10 +144,11 @@ class LoanControllerTest {
         void getLoanSchedule_returns404_whenNotFound() throws Exception {
                 when(loanService.getSchedule(2L))
                                 .thenThrow(new ApiException("LOAN_SCHEDULE_NOT_FOUND",
-                                                "Amortization schedule not found for loan ID: 2"));
+                                                "Amortization schedule not found for loan ID: 2",
+                                                org.springframework.http.HttpStatus.NOT_FOUND));
 
                 mockMvc.perform(get("/api/v1/loans/{loanId}/schedule", 2L))
-                                .andExpect(status().isBadRequest())
+                                .andExpect(status().isNotFound())
                                 .andExpect(jsonPath("$.success").value(false))
                                 .andExpect(jsonPath("$.message")
                                                 .value("Amortization schedule not found for loan ID: 2"));

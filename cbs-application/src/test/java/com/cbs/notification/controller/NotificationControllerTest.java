@@ -2,7 +2,7 @@ package com.cbs.notification.controller;
 
 import com.cbs.common.exception.ApiException;
 import com.cbs.notification.dto.NotificationResponse;
-import com.cbs.notification.exception.NotificationExceptionHandler;
+import com.cbs.common.exception.GlobalExceptionHandler;
 import com.cbs.notification.model.NotificationChannel;
 import com.cbs.notification.model.NotificationStatus;
 import com.cbs.notification.service.NotificationService;
@@ -24,7 +24,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc(addFilters = false)
 @WebMvcTest(NotificationController.class)
-@Import(NotificationExceptionHandler.class)
+@Import(GlobalExceptionHandler.class)
 class NotificationControllerTest {
     @MockBean
     private com.cbs.auth.service.JwtService jwtService;

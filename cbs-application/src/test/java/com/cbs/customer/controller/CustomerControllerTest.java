@@ -2,7 +2,7 @@ package com.cbs.customer.controller;
 
 import com.cbs.common.exception.ApiException;
 import com.cbs.customer.dto.CustomerResponse;
-import com.cbs.customer.exception.CustomerExceptionHandler;
+import com.cbs.common.exception.GlobalExceptionHandler;
 import com.cbs.customer.model.KycStatus;
 import com.cbs.customer.service.CustomerService;
 import org.junit.jupiter.api.Test;
@@ -23,14 +23,13 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc(addFilters = false)
 @WebMvcTest(CustomerController.class)
-@Import(CustomerExceptionHandler.class)
+@Import(GlobalExceptionHandler.class)
 class CustomerControllerTest {
-    @MockBean
-    private com.cbs.auth.service.JwtService jwtService;
+  @MockBean
+  private com.cbs.auth.service.JwtService jwtService;
 
-    @MockBean
-    private org.springframework.security.core.userdetails.UserDetailsService userDetailsService;
-
+  @MockBean
+  private org.springframework.security.core.userdetails.UserDetailsService userDetailsService;
 
   @Autowired
   private MockMvc mockMvc;
@@ -104,6 +103,25 @@ class CustomerControllerTest {
         .andExpect(status().isBadRequest())
         .andExpect(jsonPath("$.success").value(false))
         .andExpect(jsonPath("$.message").value("Customer not found"));
+  }
+
+  @Test
+  void updateKycStatus_returnsConflictResponse_whenDuplicate() throws Exception {
+    when(customerService.updateKycStatus(any(), any()))
+        .thenThrow(new ApiException("CONFLICT", "Duplicate resource", org.springframework.http.HttpStatus.CONFLICT));
+
+    String body = """
+        {
+          "kycStatus": "VERIFIED"
+        }
+        """;
+
+    mockMvc.perform(patch("/api/v1/customers/{customerId}/kyc-status", 1)
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(body))
+        .andExpect(status().isConflict())
+        .andExpect(jsonPath("$.success").value(false))
+        .andExpect(jsonPath("$.message").value("Duplicate resource"));
   }
 
   @Test

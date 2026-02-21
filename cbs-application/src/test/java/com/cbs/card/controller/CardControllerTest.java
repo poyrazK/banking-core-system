@@ -1,7 +1,7 @@
 package com.cbs.card.controller;
 
 import com.cbs.card.dto.CardResponse;
-import com.cbs.card.exception.CardExceptionHandler;
+import com.cbs.common.exception.GlobalExceptionHandler;
 import com.cbs.card.model.CardStatus;
 import com.cbs.card.model.CardType;
 import com.cbs.card.service.CardService;
@@ -27,7 +27,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc(addFilters = false)
 @WebMvcTest(CardController.class)
-@Import(CardExceptionHandler.class)
+@Import(GlobalExceptionHandler.class)
 class CardControllerTest {
   @MockBean
   private com.cbs.auth.service.JwtService jwtService;

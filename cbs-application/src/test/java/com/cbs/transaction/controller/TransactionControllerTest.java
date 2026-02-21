@@ -2,7 +2,7 @@ package com.cbs.transaction.controller;
 
 import com.cbs.common.exception.ApiException;
 import com.cbs.transaction.dto.TransactionResponse;
-import com.cbs.transaction.exception.TransactionExceptionHandler;
+import com.cbs.common.exception.GlobalExceptionHandler;
 import com.cbs.transaction.model.TransactionStatus;
 import com.cbs.transaction.model.TransactionType;
 import com.cbs.transaction.service.TransactionService;
@@ -27,7 +27,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc(addFilters = false)
 @WebMvcTest(TransactionController.class)
-@Import(TransactionExceptionHandler.class)
+@Import(GlobalExceptionHandler.class)
 class TransactionControllerTest {
         @MockBean
         private com.cbs.auth.service.JwtService jwtService;

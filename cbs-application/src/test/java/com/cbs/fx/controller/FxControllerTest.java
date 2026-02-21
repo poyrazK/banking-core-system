@@ -2,7 +2,7 @@ package com.cbs.fx.controller;
 
 import com.cbs.common.exception.ApiException;
 import com.cbs.fx.dto.FxRateResponse;
-import com.cbs.fx.exception.FxExceptionHandler;
+import com.cbs.common.exception.GlobalExceptionHandler;
 import com.cbs.fx.model.FxRateStatus;
 import com.cbs.fx.service.FxService;
 import org.junit.jupiter.api.Test;
@@ -24,7 +24,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc(addFilters = false)
 @WebMvcTest(FxController.class)
-@Import(FxExceptionHandler.class)
+@Import(GlobalExceptionHandler.class)
 class FxControllerTest {
     @MockBean
     private com.cbs.auth.service.JwtService jwtService;

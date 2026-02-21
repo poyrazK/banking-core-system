@@ -2,7 +2,7 @@ package com.cbs.interest.controller;
 
 import com.cbs.common.exception.ApiException;
 import com.cbs.interest.dto.InterestConfigResponse;
-import com.cbs.interest.exception.InterestExceptionHandler;
+import com.cbs.common.exception.GlobalExceptionHandler;
 import com.cbs.interest.model.InterestBasis;
 import com.cbs.interest.model.InterestStatus;
 import com.cbs.interest.service.InterestService;
@@ -25,7 +25,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc(addFilters = false)
 @WebMvcTest(InterestController.class)
-@Import(InterestExceptionHandler.class)
+@Import(GlobalExceptionHandler.class)
 class InterestControllerTest {
     @MockBean
     private com.cbs.auth.service.JwtService jwtService;
