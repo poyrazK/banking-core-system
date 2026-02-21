@@ -39,3 +39,4 @@ We will implement an automated Loan Amortization Engine.
 ## Verification
 - Unit tests verify math accuracy for all three amortization types.
 - Mocked service tests ensure persistence happens during disbursement.
+- Integration tests (`LoanServicePostgresIntegrationTest`) validate end-to-end persistence of amortization schedules against a real Postgres instance, covering disbursement, schedule creation, storage, and retrieval. This integration test ensures the full data flow and DB constraints are exercised to strengthen the verification story.
