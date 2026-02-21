@@ -28,7 +28,7 @@ public record LoanScheduleResponse(
             boolean paid) {
     }
 
-    public static LoanScheduleResponse from(Loan loan, AmortizationType type, List<LoanScheduleEntry> entries) {
+    public static LoanScheduleResponse from(Loan loan, List<LoanScheduleEntry> entries) {
         BigDecimal totalInterest = entries.stream()
                 .map(LoanScheduleEntry::getInterestAmount)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
@@ -54,7 +54,7 @@ public record LoanScheduleResponse(
                 loan.getPrincipalAmount(),
                 loan.getAnnualInterestRate(),
                 loan.getTermMonths(),
-                type,
+                loan.getAmortizationType(),
                 totalInterest,
                 totalPayment,
                 installments);

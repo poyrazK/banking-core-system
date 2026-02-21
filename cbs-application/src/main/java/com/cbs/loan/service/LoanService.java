@@ -73,7 +73,7 @@ public class LoanService {
             throw new ApiException("LOAN_SCHEDULE_NOT_FOUND", "Amortization schedule not found for loan ID: " + loanId);
         }
 
-        return LoanScheduleResponse.from(loan, loan.getAmortizationType(), entries);
+        return LoanScheduleResponse.from(loan, entries);
     }
 
     @Transactional(readOnly = true)
@@ -132,13 +132,14 @@ public class LoanService {
         Loan savedLoan = loanRepository.save(loan);
 
         // Generate and save amortization schedule
+        loanScheduleRepository.deleteByLoanId(loanId);
         List<LoanScheduleEntry> schedule = AmortizationCalculator.generateSchedule(
-                loanId,
-                loan.getPrincipalAmount(),
-                loan.getAnnualInterestRate(),
-                loan.getTermMonths(),
-                loan.getStartDate(),
-                loan.getAmortizationType());
+                savedLoan.getId(),
+                savedLoan.getPrincipalAmount(),
+                savedLoan.getAnnualInterestRate(),
+                savedLoan.getTermMonths(),
+                savedLoan.getStartDate(),
+                savedLoan.getAmortizationType());
         loanScheduleRepository.saveAll(schedule);
 
         return LoanResponse.from(savedLoan);
