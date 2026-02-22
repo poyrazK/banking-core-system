@@ -63,6 +63,9 @@ public class Transaction extends AuditableEntity {
     @Column(length = 255)
     private String failureReason;
 
+    @Column(name = "parent_transaction_id")
+    private Long parentTransactionId;
+
     public Transaction() {
     }
 
@@ -86,6 +89,21 @@ public class Transaction extends AuditableEntity {
         this.description = description;
         this.reference = reference;
         this.valueDate = valueDate;
+    }
+
+    public Transaction(Long customerId,
+            Long accountId,
+            Long counterpartyAccountId,
+            Long cardId,
+            TransactionType type,
+            BigDecimal amount,
+            String currency,
+            String description,
+            String reference,
+            LocalDate valueDate,
+            Long parentTransactionId) {
+        this(customerId, accountId, counterpartyAccountId, cardId, type, amount, currency, description, reference, valueDate);
+        this.parentTransactionId = parentTransactionId;
     }
 
     public Long getId() {
@@ -144,6 +162,10 @@ public class Transaction extends AuditableEntity {
         return failureReason;
     }
 
+    public Long getParentTransactionId() {
+        return parentTransactionId;
+    }
+
     public void setStatus(TransactionStatus status) {
         this.status = status;
     }
@@ -154,5 +176,9 @@ public class Transaction extends AuditableEntity {
 
     public void setFailureReason(String failureReason) {
         this.failureReason = failureReason;
+    }
+
+    public void setParentTransactionId(Long parentTransactionId) {
+        this.parentTransactionId = parentTransactionId;
     }
 }
