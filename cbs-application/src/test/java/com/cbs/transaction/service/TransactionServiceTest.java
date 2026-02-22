@@ -2,6 +2,8 @@ package com.cbs.transaction.service;
 
 import com.cbs.card.service.CardSpendingService;
 import com.cbs.common.exception.ApiException;
+import com.cbs.fee.dto.FeeChargeResponse;
+import com.cbs.fee.service.FeeService;
 import com.cbs.transaction.dto.CreateTransactionRequest;
 import com.cbs.transaction.dto.ReverseTransactionRequest;
 import com.cbs.transaction.dto.TransactionResponse;
@@ -27,6 +29,8 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -44,12 +48,15 @@ class TransactionServiceTest {
     @Mock
     private CardSpendingService cardSpendingService;
 
+    @Mock
+    private FeeService feeService;
+
     private TransactionService transactionService;
 
     @BeforeEach
     void setUp() {
         transactionService = new TransactionService(
-                transactionRepository, ledgerPostingClient, accountClient, cardSpendingService);
+                transactionRepository, ledgerPostingClient, accountClient, cardSpendingService, feeService);
     }
 
     @Test
@@ -64,7 +71,8 @@ class TransactionServiceTest {
                 "try",
                 "  monthly transfer  ",
                 "  ref-001  ",
-                LocalDate.of(2026, 2, 18));
+                LocalDate.of(2026, 2, 18),
+                null);
 
         when(transactionRepository.existsByReference("REF-001")).thenReturn(false);
         when(accountClient.getAccountCurrency(10L)).thenReturn("TRY");
@@ -91,7 +99,8 @@ class TransactionServiceTest {
                 "TRY",
                 "bill pay",
                 "REF-FAIL",
-                LocalDate.of(2026, 2, 18));
+                LocalDate.of(2026, 2, 18),
+                null);
 
         when(transactionRepository.existsByReference("REF-FAIL")).thenReturn(false);
         when(accountClient.getAccountCurrency(10L)).thenReturn("TRY");
@@ -107,6 +116,51 @@ class TransactionServiceTest {
     }
 
     @Test
+    void createTransaction_withFee_processesFeeSuccessfully() {
+        CreateTransactionRequest request = new CreateTransactionRequest(
+                1L,
+                10L,
+                null,
+                null,
+                TransactionType.TRANSFER,
+                BigDecimal.valueOf(1000),
+                "TRY",
+                "transfer with fee",
+                "REF-FEE-TEST",
+                LocalDate.of(2026, 2, 18),
+                "TRF_FEE");
+
+        when(transactionRepository.existsByReference("REF-FEE-TEST")).thenReturn(false);
+        when(accountClient.getAccountCurrency(10L)).thenReturn("TRY");
+        when(transactionRepository.save(any(Transaction.class))).thenAnswer(invocation -> {
+            Transaction tx = invocation.getArgument(0);
+            if (tx.getId() == null) {
+                // Mock setting ID for the first save of each transaction
+                java.lang.reflect.Field field = Transaction.class.getDeclaredField("id");
+                field.setAccessible(true);
+                field.set(tx, tx.getType() == TransactionType.FEE ? 200L : 100L);
+            }
+            return tx;
+        });
+
+        FeeChargeResponse feeResponse = new FeeChargeResponse(1L, 10L, "TRF_FEE", BigDecimal.valueOf(1000),
+                BigDecimal.valueOf(10), "TRY");
+        when(feeService.chargeFee(any())).thenReturn(feeResponse);
+
+        transactionService.createTransaction(request);
+
+        // Verify save was called for:
+        // 1. Main transaction (INITIATED)
+        // 2. Main transaction (PROCESSING)
+        // 3. Main transaction (POSTED)
+        // 4. Fee transaction (INITIATED)
+        // 5. Fee transaction (PROCESSING)
+        // 6. Fee transaction (POSTED)
+        verify(transactionRepository, times(6)).save(any(Transaction.class));
+        verify(ledgerPostingClient, times(2)).postTransaction(any(Transaction.class));
+    }
+
+    @Test
     void createTransaction_throwsWhenReferenceAlreadyExists() {
         CreateTransactionRequest request = new CreateTransactionRequest(
                 1L,
@@ -118,7 +172,8 @@ class TransactionServiceTest {
                 "TRY",
                 "fee",
                 "REF-001",
-                LocalDate.of(2026, 2, 18));
+                LocalDate.of(2026, 2, 18),
+                null);
 
         when(transactionRepository.existsByReference("REF-001")).thenReturn(true);
 
@@ -140,7 +195,8 @@ class TransactionServiceTest {
                 "USD",
                 "deposit",
                 "REF-USD",
-                LocalDate.of(2026, 2, 18));
+                LocalDate.of(2026, 2, 18),
+                null);
 
         when(transactionRepository.existsByReference("REF-USD")).thenReturn(false);
         when(accountClient.getAccountCurrency(10L)).thenReturn("TRY");
