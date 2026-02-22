@@ -77,4 +77,20 @@ public class InterestController {
         List<InterestAccrualResponse> responses = interestService.listAccruals(accountId, productCode);
         return ResponseEntity.ok(ApiResponse.success("Interest accruals retrieved", responses));
     }
+
+    @PostMapping("/jobs/accrual:trigger")
+    public ResponseEntity<ApiResponse<Integer>> triggerDailyAccrual(
+            @RequestParam(value = "date", required = false) java.time.LocalDate date) {
+        java.time.LocalDate processDate = date != null ? date : java.time.LocalDate.now();
+        int count = interestService.calculateDailyAccrualsForAllAccounts(processDate);
+        return ResponseEntity.ok(ApiResponse.success("Daily interest accrual triggered successfully", count));
+    }
+
+    @PostMapping("/jobs/capitalization:trigger")
+    public ResponseEntity<ApiResponse<Integer>> triggerMonthlyCapitalization(
+            @RequestParam(value = "date", required = false) java.time.LocalDate date) {
+        java.time.LocalDate processDate = date != null ? date : java.time.LocalDate.now();
+        int count = interestService.capitalizeMonthlyAccruals(processDate);
+        return ResponseEntity.ok(ApiResponse.success("Monthly interest capitalization triggered successfully", count));
+    }
 }
