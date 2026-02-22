@@ -48,6 +48,9 @@ class LoanControllerTest {
         @MockBean
         private LoanService loanService;
 
+        @MockBean
+        private com.cbs.loan.service.LoanRepaymentService loanRepaymentService;
+
         @Test
         void createLoan_returnsSuccessResponse() throws Exception {
                 LoanResponse response = new LoanResponse(
