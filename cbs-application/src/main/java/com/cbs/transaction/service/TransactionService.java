@@ -2,6 +2,9 @@ package com.cbs.transaction.service;
 
 import com.cbs.card.service.CardSpendingService;
 import com.cbs.common.exception.ApiException;
+import com.cbs.fee.dto.ChargeFeeRequest;
+import com.cbs.fee.dto.FeeChargeResponse;
+import com.cbs.fee.service.FeeService;
 import com.cbs.transaction.dto.CreateTransactionRequest;
 import com.cbs.transaction.dto.ReverseTransactionRequest;
 import com.cbs.transaction.dto.TransactionResponse;
@@ -9,10 +12,12 @@ import com.cbs.transaction.integration.AccountClient;
 import com.cbs.transaction.integration.LedgerPostingClient;
 import com.cbs.transaction.model.Transaction;
 import com.cbs.transaction.model.TransactionStatus;
+import com.cbs.transaction.model.TransactionType;
 import com.cbs.transaction.repository.TransactionRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @Service
@@ -22,15 +27,18 @@ public class TransactionService {
     private final LedgerPostingClient ledgerPostingClient;
     private final AccountClient accountClient;
     private final CardSpendingService cardSpendingService;
+    private final FeeService feeService;
 
     public TransactionService(TransactionRepository transactionRepository,
             LedgerPostingClient ledgerPostingClient,
             AccountClient accountClient,
-            CardSpendingService cardSpendingService) {
+            CardSpendingService cardSpendingService,
+            FeeService feeService) {
         this.transactionRepository = transactionRepository;
         this.ledgerPostingClient = ledgerPostingClient;
         this.accountClient = accountClient;
         this.cardSpendingService = cardSpendingService;
+        this.feeService = feeService;
     }
 
     @Transactional
@@ -79,7 +87,51 @@ public class TransactionService {
             processingTransaction.setFailureReason(truncateReason(exception.getMessage()));
         }
 
-        return TransactionResponse.from(transactionRepository.save(processingTransaction));
+        Transaction finalTransaction = transactionRepository.save(processingTransaction);
+
+        // Handle fee if feeCode is provided and main transaction succeeded
+        if (request.feeCode() != null && finalTransaction.getStatus() == TransactionStatus.POSTED) {
+            processTransactionFee(finalTransaction, request.feeCode());
+        }
+
+        return TransactionResponse.from(finalTransaction);
+    }
+
+    private void processTransactionFee(Transaction parentTransaction, String feeCode) {
+        ChargeFeeRequest feeRequest = new ChargeFeeRequest(
+                parentTransaction.getAccountId(),
+                feeCode,
+                parentTransaction.getAmount(),
+                parentTransaction.getCurrency());
+
+        FeeChargeResponse feeCharge = feeService.chargeFee(feeRequest);
+
+        String feeReference = "FEE-" + parentTransaction.getReference();
+        Transaction feeTransaction = new Transaction(
+                parentTransaction.getCustomerId(),
+                parentTransaction.getAccountId(),
+                null, // counterparty for fee is usually internal bank account, kept null for now
+                null,
+                TransactionType.FEE,
+                feeCharge.feeAmount(),
+                parentTransaction.getCurrency(),
+                "Fee for transaction " + parentTransaction.getReference(),
+                feeReference,
+                parentTransaction.getValueDate(),
+                parentTransaction.getId());
+
+        Transaction createdFeeTx = transactionRepository.save(feeTransaction);
+        createdFeeTx.setStatus(TransactionStatus.PROCESSING);
+        Transaction processingFeeTx = transactionRepository.save(createdFeeTx);
+
+        try {
+            ledgerPostingClient.postTransaction(processingFeeTx);
+            processingFeeTx.setStatus(TransactionStatus.POSTED);
+        } catch (ApiException exception) {
+            processingFeeTx.setStatus(TransactionStatus.FAILED);
+            processingFeeTx.setFailureReason(truncateReason(exception.getMessage()));
+        }
+        transactionRepository.save(processingFeeTx);
     }
 
     @Transactional(readOnly = true)

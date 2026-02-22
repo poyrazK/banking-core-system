@@ -21,5 +21,6 @@ public record CreateTransactionRequest(
                 @NotBlank @Pattern(regexp = "^[A-Z]{3}$") String currency,
                 @NotBlank @Size(max = 255) String description,
                 @NotBlank @Size(max = 64) String reference,
-                @NotNull LocalDate valueDate) {
+                @NotNull LocalDate valueDate,
+                @Size(max = 32) String feeCode) {
 }
