@@ -18,4 +18,6 @@ public interface LoanScheduleRepository extends JpaRepository<LoanScheduleEntry,
     @Transactional
     @Query("DELETE FROM LoanScheduleEntry se WHERE se.loanId = :loanId")
     void deleteByLoanId(@Param("loanId") Long loanId);
+
+    List<LoanScheduleEntry> findByPaidFalseAndDueDateLessThanEqualOrderByDueDateAsc(java.time.LocalDate date);
 }
