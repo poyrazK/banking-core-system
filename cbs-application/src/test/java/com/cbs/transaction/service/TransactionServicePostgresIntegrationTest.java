@@ -64,7 +64,8 @@ class TransactionServicePostgresIntegrationTest {
                 "TRY",
                 "Salary transfer",
                 " tx-ref-1 ",
-                LocalDate.of(2026, 2, 18));
+                LocalDate.of(2026, 2, 18),
+                null);
 
         org.mockito.Mockito.when(accountClient.getAccountCurrency(201L)).thenReturn("TRY");
 
@@ -87,7 +88,8 @@ class TransactionServicePostgresIntegrationTest {
                 "USD",
                 "Card payment",
                 "TX-REF-2",
-                LocalDate.of(2026, 2, 18));
+                LocalDate.of(2026, 2, 18),
+                null);
 
         org.mockito.Mockito.when(accountClient.getAccountCurrency(202L)).thenReturn("USD");
 
