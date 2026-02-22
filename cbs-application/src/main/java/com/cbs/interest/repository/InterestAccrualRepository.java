@@ -10,4 +10,8 @@ public interface InterestAccrualRepository extends JpaRepository<InterestAccrual
     List<InterestAccrual> findByAccountIdOrderByIdDesc(Long accountId);
 
     List<InterestAccrual> findByProductCodeOrderByIdDesc(String productCode);
+
+    boolean existsByAccountIdAndAccrualDate(Long accountId, java.time.LocalDate accrualDate);
+
+    List<InterestAccrual> findByStatus(com.cbs.interest.model.AccrualStatus status);
 }

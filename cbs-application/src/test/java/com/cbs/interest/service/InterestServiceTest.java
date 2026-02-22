@@ -12,6 +12,8 @@ import com.cbs.interest.model.InterestConfig;
 import com.cbs.interest.model.InterestStatus;
 import com.cbs.interest.repository.InterestAccrualRepository;
 import com.cbs.interest.repository.InterestConfigRepository;
+import com.cbs.account.service.AccountService;
+import com.cbs.ledger.service.LedgerPostingService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -36,11 +38,21 @@ class InterestServiceTest {
     @Mock
     private InterestAccrualRepository interestAccrualRepository;
 
+    @Mock
+    private AccountService accountService;
+
+    @Mock
+    private LedgerPostingService ledgerPostingService;
+
     private InterestService interestService;
 
     @BeforeEach
     void setUp() {
-        interestService = new InterestService(interestConfigRepository, interestAccrualRepository);
+        interestService = new InterestService(
+                interestConfigRepository,
+                interestAccrualRepository,
+                accountService,
+                ledgerPostingService);
     }
 
     @Test
@@ -49,10 +61,10 @@ class InterestServiceTest {
                 "  sav-01  ",
                 BigDecimal.valueOf(12.50),
                 InterestBasis.SIMPLE,
-                30
-        );
+                30);
         when(interestConfigRepository.existsByProductCode("SAV-01")).thenReturn(false);
-        when(interestConfigRepository.save(any(InterestConfig.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(interestConfigRepository.save(any(InterestConfig.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
 
         InterestConfigResponse response = interestService.createConfig(request);
 
@@ -66,8 +78,7 @@ class InterestServiceTest {
                 "SAV-01",
                 BigDecimal.valueOf(12.50),
                 InterestBasis.SIMPLE,
-                30
-        );
+                30);
         when(interestConfigRepository.existsByProductCode("SAV-01")).thenReturn(true);
 
         ApiException exception = assertThrows(ApiException.class, () -> interestService.createConfig(request));
@@ -81,7 +92,8 @@ class InterestServiceTest {
         config.setStatus(InterestStatus.INACTIVE);
         when(interestConfigRepository.findByProductCode("SAV-01")).thenReturn(Optional.of(config));
 
-        RunAccrualRequest request = new RunAccrualRequest(1L, "sav-01", BigDecimal.valueOf(10000), LocalDate.of(2026, 2, 18));
+        RunAccrualRequest request = new RunAccrualRequest(1L, "sav-01", BigDecimal.valueOf(10000),
+                LocalDate.of(2026, 2, 18));
 
         ApiException exception = assertThrows(ApiException.class, () -> interestService.runAccrual(request));
 
@@ -92,11 +104,11 @@ class InterestServiceTest {
     void runAccrual_createsAccrualWithComputedAmount() {
         InterestConfig config = new InterestConfig("SAV-01", BigDecimal.valueOf(12), InterestBasis.SIMPLE, 30);
         when(interestConfigRepository.findByProductCode("SAV-01")).thenReturn(Optional.of(config));
-        when(interestAccrualRepository.save(any(InterestAccrual.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(interestAccrualRepository.save(any(InterestAccrual.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
 
         InterestAccrualResponse response = interestService.runAccrual(
-                new RunAccrualRequest(1L, "sav-01", BigDecimal.valueOf(10000), LocalDate.of(2026, 2, 18))
-        );
+                new RunAccrualRequest(1L, "sav-01", BigDecimal.valueOf(10000), LocalDate.of(2026, 2, 18)));
 
         assertEquals("SAV-01", response.productCode());
         assertEquals(BigDecimal.valueOf(98.63), response.accruedAmount());
@@ -108,9 +120,8 @@ class InterestServiceTest {
                 ApiException.class,
                 () -> interestService.updateConfig(
                         "SAV-01",
-                        new UpdateInterestConfigRequest(BigDecimal.valueOf(12), InterestBasis.SIMPLE, 0, InterestStatus.ACTIVE)
-                )
-        );
+                        new UpdateInterestConfigRequest(BigDecimal.valueOf(12), InterestBasis.SIMPLE, 0,
+                                InterestStatus.ACTIVE)));
 
         assertEquals("INTEREST_INVALID_FREQUENCY", exception.getErrorCode());
     }

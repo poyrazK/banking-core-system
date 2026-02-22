@@ -3,6 +3,8 @@ package com.cbs.interest.model;
 import com.cbs.common.model.AuditableEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -34,19 +36,27 @@ public class InterestAccrual extends AuditableEntity {
     @Column(nullable = false)
     private LocalDate accrualDate;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 16)
+    private AccrualStatus status = AccrualStatus.ACCRUED;
+
+    @Column(name = "capitalization_date")
+    private LocalDate capitalizationDate;
+
     public InterestAccrual() {
     }
 
     public InterestAccrual(Long accountId,
-                           String productCode,
-                           BigDecimal principalAmount,
-                           BigDecimal accruedAmount,
-                           LocalDate accrualDate) {
+            String productCode,
+            BigDecimal principalAmount,
+            BigDecimal accruedAmount,
+            LocalDate accrualDate) {
         this.accountId = accountId;
         this.productCode = productCode;
         this.principalAmount = principalAmount;
         this.accruedAmount = accruedAmount;
         this.accrualDate = accrualDate;
+        this.status = AccrualStatus.ACCRUED;
     }
 
     public Long getId() {
@@ -72,4 +82,21 @@ public class InterestAccrual extends AuditableEntity {
     public LocalDate getAccrualDate() {
         return accrualDate;
     }
+
+    public AccrualStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(AccrualStatus status) {
+        this.status = status;
+    }
+
+    public LocalDate getCapitalizationDate() {
+        return capitalizationDate;
+    }
+
+    public void setCapitalizationDate(LocalDate capitalizationDate) {
+        this.capitalizationDate = capitalizationDate;
+    }
+
 }
