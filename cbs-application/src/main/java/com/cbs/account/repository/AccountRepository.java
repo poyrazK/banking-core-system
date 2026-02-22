@@ -10,4 +10,7 @@ public interface AccountRepository extends JpaRepository<Account, Long> {
     boolean existsByAccountNumber(String accountNumber);
 
     List<Account> findByCustomerIdOrderByIdDesc(Long customerId);
+
+    List<Account> findByTypeAndStatus(com.cbs.account.model.AccountType type,
+            com.cbs.account.model.AccountStatus status);
 }

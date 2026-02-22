@@ -50,6 +50,14 @@ public class AccountService {
         return accounts.stream().map(AccountResponse::from).toList();
     }
 
+    @Transactional(readOnly = true)
+    public List<AccountResponse> listAccountsByTypeAndStatus(com.cbs.account.model.AccountType type,
+            AccountStatus status) {
+        return accountRepository.findByTypeAndStatus(type, status).stream()
+                .map(AccountResponse::from)
+                .toList();
+    }
+
     @Transactional
     public AccountResponse creditBalance(Long accountId, BalanceUpdateRequest request) {
         Account account = findAccount(accountId);
