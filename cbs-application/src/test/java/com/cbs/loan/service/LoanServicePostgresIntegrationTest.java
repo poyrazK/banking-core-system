@@ -88,4 +88,46 @@ class LoanServicePostgresIntegrationTest {
         Loan persisted = loanRepository.findById(created.id()).orElseThrow();
         assertEquals(LoanStatus.CLOSED, persisted.getStatus());
     }
+
+    @org.springframework.boot.test.mock.mockito.MockBean
+    private com.cbs.account.service.AccountService accountService;
+
+    @org.springframework.boot.test.mock.mockito.MockBean
+    private com.cbs.ledger.service.LedgerPostingService ledgerPostingService;
+
+    @Autowired
+    private LoanRepaymentService loanRepaymentService;
+
+    @Test
+    void automatedRepaymentEngineDeductsBalanceCorrectly() {
+        LoanResponse created = loanService.createLoan(new CreateLoanRequest(
+                3L,
+                30L,
+                "LOAN-003",
+                LoanType.PERSONAL,
+                BigDecimal.valueOf(1000),
+                BigDecimal.valueOf(10),
+                12,
+                LocalDate.now().minusMonths(1),
+                LocalDate.now().plusMonths(11),
+                AmortizationType.FLAT));
+
+        loanService.approveLoan(created.id());
+        loanService.disburseLoan(created.id());
+
+        com.cbs.account.dto.AccountResponse mockAccountResponse = new com.cbs.account.dto.AccountResponse(
+                30L, 3L, "ACC-002", com.cbs.account.model.AccountType.SAVINGS,
+                com.cbs.account.model.Currency.USD, com.cbs.account.model.AccountStatus.ACTIVE,
+                BigDecimal.valueOf(10000));
+
+        org.mockito.Mockito.when(accountService.getAccount(30L)).thenReturn(mockAccountResponse);
+
+        int processed = loanRepaymentService.processDueInstallments(LocalDate.now());
+
+        assertTrue(processed > 0);
+        org.mockito.Mockito.verify(accountService, org.mockito.Mockito.atLeastOnce())
+                .debitBalance(org.mockito.ArgumentMatchers.anyLong(), org.mockito.ArgumentMatchers.any());
+        org.mockito.Mockito.verify(ledgerPostingService, org.mockito.Mockito.atLeastOnce())
+                .postEntry(org.mockito.ArgumentMatchers.any());
+    }
 }
