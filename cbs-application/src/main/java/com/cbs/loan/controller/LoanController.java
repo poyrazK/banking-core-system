@@ -29,9 +29,11 @@ import java.util.List;
 public class LoanController {
 
     private final LoanService loanService;
+    private final com.cbs.loan.service.LoanRepaymentService loanRepaymentService;
 
-    public LoanController(LoanService loanService) {
+    public LoanController(LoanService loanService, com.cbs.loan.service.LoanRepaymentService loanRepaymentService) {
         this.loanService = loanService;
+        this.loanRepaymentService = loanRepaymentService;
     }
 
     @PostMapping
@@ -87,5 +89,13 @@ public class LoanController {
             @PathVariable("loanId") Long loanId) {
         LoanScheduleResponse response = loanService.getSchedule(loanId);
         return ResponseEntity.ok(ApiResponse.success("Loan schedule retrieved", response));
+    }
+
+    @PostMapping("/jobs/repayment:trigger")
+    public ResponseEntity<ApiResponse<Integer>> triggerDailyRepayment(
+            @RequestParam(value = "date", required = false) java.time.LocalDate date) {
+        java.time.LocalDate processDate = date != null ? date : java.time.LocalDate.now();
+        int count = loanRepaymentService.processDueInstallments(processDate);
+        return ResponseEntity.ok(ApiResponse.success("Daily loan repayment triggered successfully", count));
     }
 }
